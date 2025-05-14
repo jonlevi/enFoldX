@@ -11,7 +11,7 @@ After the installation you should have:
 - path to downloaded databases
 - path to the docker/singularity container for running alphafold
 
-Please keep in mind that you must comply with the [TERMS OF USE]([https://example.com/docs](https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md) set by Deepmind in order to use AlphaFold3.
+Please keep in mind that you must comply with the [TERMS OF USE](https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md) set by Deepmind in order to use AlphaFold3.
 
 ### Installing this repository
 Clone the repository:
