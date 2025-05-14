@@ -131,7 +131,7 @@ def main(args):
     best_results_df.to_csv(os.path.join(args.output_dir, 'best_features.csv'))
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
         "-s",
