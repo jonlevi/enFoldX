@@ -104,8 +104,8 @@ options:
 ```
 You still need the original sequences file from Step 0 and you will also need:
 
-(1) the path that the chain id map was written to in Step 1 and 
-(2) the directory that AlphaFold3 wrote the MSA output to. (Note this is the output of step 2, not the output of step 1)
+1) the path that the chain id map was written to in Step 1 and 
+2) the directory that AlphaFold3 wrote the MSA output to. (Note this is the output of step 2, not the output of step 1)
 
 You can choose how many [random seeds](https://github.com/google-deepmind/alphafold3/blob/main/docs/input.md#random-seeds) to use in the AF3 inference. By default, we use 5 seeds per complex. You can add more or remove them by changing the `--af3-seeds` flag. Note that each additional seeds adds about an additional 1-2 minutes at minimum per complex to the runtime, but your predictive accuracy may improve with more seeds.
 
@@ -147,14 +147,14 @@ options:
 ```
 You still need the original sequences file from Step 0 and you will also need:
 
-(1) the path that the chain id map was written to in Step 1 and 
-(2) the directory that AlphaFold3 wrote the output to  (this is the output of step 4)
-(3) the choice of random seeds that you used in step 3 (if you did not use the default), because AF3 outputs 5 new structures for every seed you choose
+1) the path that the chain id map was written to in Step 1 and 
+2) the directory that AlphaFold3 wrote the output to  (this is the output of step 4)
+3) the choice of random seeds that you used in step 3 (if you did not use the default), because AF3 outputs 5 new structures for every seed you choose
 
 This script will output 3 CSV files in the output directory:
-(1) all_structures_features.csv - this contains a row for every predicted structure. So for example, if you had 5 seeds, then you will have 20 rows per TCR-pMHC input (5 seeds x 5 samples/per seed)
-(2) avg_features.csv -  this contains a row for every TCR-pMHC input, where each feature is the mean of that feature across all structures predicted for that TCR-pMHC
-(3) best_features.csv - this contains a row for every TCR-pMHC input, where each feature is taken from the structure that was ranked the highest by AF3 for that TCR-pMHC
+1) all_structures_features.csv - this contains a row for every predicted structure. So for example, if you had 5 seeds, then you will have 20 rows per TCR-pMHC input (5 seeds x 5 samples/per seed)
+2) avg_features.csv -  this contains a row for every TCR-pMHC input, where each feature is the mean of that feature across all structures predicted for that TCR-pMHC
+3) best_features.csv - this contains a row for every TCR-pMHC input, where each feature is taken from the structure that was ranked the highest by AF3 for that TCR-pMHC
 
 #### Example
 Following our previous example data:
