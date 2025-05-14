@@ -2,6 +2,11 @@
 This is a pipeline to help run AlphaFold3 to predict TCR-pMHC specificity. You can see our paper here <>:
 ![Project Banner](https://raw.githubusercontent.com/jonlevi/af3_tcr_pipeline/main/af3_pipeline.png) 
 
+## 📚 Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+
 ## Installation
 ### Installing AlphaFold3
 Before you do anything else, you must install AlphaFold3 following the instructions at https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md 
