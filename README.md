@@ -1,6 +1,6 @@
 # TCR peptide-MHC specificity prediction via AlphaFold3 Metrics
 This is a pipeline to help run AlphaFold3 to predict TCR-pMHC specificity. You can see our paper here <>:
-![Project Banner](https://raw.githubusercontent.com/jonlevi/af3_tcr_pipeline/main/af3_process.png) 
+![Project Banner](https://raw.githubusercontent.com/jonlevi/af3_tcr_pipeline/main/af3_process_parallel.png) 
 
 ## 📚 Table of Contents
 
