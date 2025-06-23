@@ -1,5 +1,9 @@
-# TCR peptide-MHC specificity prediction via AlphaFold3 Metrics
-This is a pipeline to help run AlphaFold3 to predict TCR-pMHC specificity. You can see our paper here <>:
+# enFoldX: TCR peptide-MHC specificity prediction via AlphaFold3 Metrics
+enFoldX enables the evaluation of large datasets of predicted structures simultaneously as it extracts distributions of high dimensional confidence features, including customized biophysical features. We found these features varide significantly between TCR:pMHC pairs of differing T cell reactivity, implying that binders and non-binders are separable in feature space. We then use the resultant ensemble of features to create a binding model, analogous to an energy function in statistical physics. The enFoldX approach generalizes in a dataset agnostic way - for example, models trained on human data can classify binder TCR:pMHC pairs in mouse data. Moreover, we found, for the first time, that our structure-guided models trained on publicly available data can generalize to discriminate epitopes that differ by only one mutation away from self, the resolution needed for predicting mutation-derived cancer neoantigens.
+
+You can see our paper here <>:
+
+This repo provides code for a pipeline to help run AlphaFold3 to predict TCR-pMHC specificity. 
 ![Project Banner](https://github.com/jonlevi/af3_tcr_pipeline/blob/main/af3_process_parallel.png) 
 
 ## 📚 Table of Contents
@@ -22,8 +26,8 @@ Please keep in mind that you must comply with the [TERMS OF USE](https://github.
 Clone the repository:
 
 ```bash
-git clone https://github.com/jonlevi/af3_tcr_pipeline.git
-cd af3_tcr_pipeline
+git clone https://github.com/jonlevi/enFoldX.git
+cd enFoldX
 ```
 
 ### python reqs
@@ -43,7 +47,8 @@ There are a few sequential steps to take in going from a TCR-pMHC sequence --> s
 The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. The Folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well.
 
 ### Step 0: Format TCR-pMHC sequences
-In order to run this pipeline, you will need a CSV that contains one row for every TCR-pMHC complex you wish to predict. Each row should have four columns containing the sequences of the TCRa, TCRb, MHC, and Peptide chains using 1-letter amino acid codes. By default, the pipeline assumes that the columns are named ["A_seq","B_seq","M_seq","P_seq"] respectively, although you can pass in custom column names using the optional flags to each script. If you are starting from VDJ+CDR3 calls, we recommend you use [stitchr](https://jamieheather.github.io/stitchr/index.html) to get full length TCRa and TCRb sequences. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb).
+In order to run this pipeline, you will need a CSV that contains one row for every TCR-pMHC complex you wish to predict. Each row should have four columns containing the sequences of the TCRa, TCRb, MHC, and Peptide chains using 1-letter amino acid codes. By default, the pipeline assumes that the columns are named ["A_seq","B_seq","M_seq","P_seq"] respectively, although you can pass in custom column names using the optional flags to each script. If you are starting from VDJ+CDR3 calls, we recommend you use [stitchr](https://jamieheather.github.io/stitchr/index.html) to get full length TCRa and TCRb sequences. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/.
+
 
 An example file can be found in `examples/example_input_tcr_pmhcs.csv`
 
@@ -110,7 +115,7 @@ You still need the original sequences file from Step 0 and you will also need:
 1) the path that the chain id map was written to in Step 1 and 
 2) the directory that AlphaFold3 wrote the MSA output to. (Note this is the output of step 2, not the output of step 1)
 
-You can choose how many [random seeds](https://github.com/google-deepmind/alphafold3/blob/main/docs/input.md#random-seeds) to use in the AF3 inference. By default, we use 5 seeds per complex. You can add more or remove them by changing the `--af3-seeds` flag. Note that each additional seeds adds about an additional 1-2 minutes at minimum per complex to the runtime, but your predictive accuracy may improve with more seeds.
+You can choose how many [random seeds](https://github.com/google-deepmind/alphafold3/blob/main/docs/input.md#random-seeds) to use in the AF3 inference. By default, we use 5 seeds per complex. You can add more or remove them by changing the `--af3-seeds` flag. Note that each additional seeds adds about an additional 1-2 minutes at minimum per complex to the runtime, but your predictive accuracy may improve with more seeds. See the our paper for more!
 
 #### Example:
 Following our previous example data:
