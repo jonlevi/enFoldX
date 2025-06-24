@@ -1,9 +1,11 @@
 # enFoldX: TCR peptide-MHC specificity prediction via AlphaFold3 Metrics
+
 enFoldX enables the evaluation of large datasets of predicted structures simultaneously as it extracts distributions of high dimensional confidence features, including customized biophysical features. We found these features varide significantly between TCR:pMHC pairs of differing T cell reactivity, implying that binders and non-binders are separable in feature space. We then use the resultant ensemble of features to create a binding model, analogous to an energy function in statistical physics. The enFoldX approach generalizes in a dataset agnostic way - for example, models trained on human data can classify binder TCR:pMHC pairs in mouse data. Moreover, we found, for the first time, that our structure-guided models trained on publicly available data can generalize to discriminate epitopes that differ by only one mutation away from self, the resolution needed for predicting mutation-derived cancer neoantigens.
 
 You can see our paper here <>:
 
-This repo provides code for a pipeline to help run AlphaFold3 to predict TCR-pMHC specificity. 
+This repo provides code for a pipeline to run enFoldX. The current implementation of enFoldX uses AlphaFold3 and runs predictions for complex binding betweens TCRs and peptide-MHC complexes. 
+
 ![Project Banner](https://github.com/jonlevi/af3_tcr_pipeline/blob/main/af3_process_parallel.png) 
 
 ## 📚 Table of Contents
@@ -12,7 +14,7 @@ This repo provides code for a pipeline to help run AlphaFold3 to predict TCR-pMH
 - [Usage](#usage)
 
 ## Terms of Use
-By using enFoldX, you are agreeing to the terms set in the enFoldX [Terms of Use](TERMS_OF_USE.md)
+By using enFoldX, you are agreeing to the terms set in the enFoldX [Terms of Use](TERMS_OF_USE.md).
 
 ## Installation
 ### Installing AlphaFold3
