@@ -9,7 +9,7 @@ This repo provides code for a pipeline to run enFoldX. The current implementatio
 ![Project Banner](https://github.com/jonlevi/af3_tcr_pipeline/blob/main/af3_process_parallel.png) 
 
 ## 📚 Table of Contents
-- [Terms of use]
+- [Terms of use](#terms-of-use)
 - [Installation](#installation)
 - [Usage](#usage)
 
