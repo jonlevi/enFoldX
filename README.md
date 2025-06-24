@@ -7,20 +7,23 @@ This repo provides code for a pipeline to help run AlphaFold3 to predict TCR-pMH
 ![Project Banner](https://github.com/jonlevi/af3_tcr_pipeline/blob/main/af3_process_parallel.png) 
 
 ## 📚 Table of Contents
-
+- [Terms of use]
 - [Installation](#installation)
 - [Usage](#usage)
 
+## Terms of Use
+By using enFoldX, you are agreeing to the terms set in the enFoldX [Terms of Use](TERMS_OF_USE.md)
+
 ## Installation
 ### Installing AlphaFold3
-Before you do anything else, you must install AlphaFold3 following the instructions at https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md 
+If you wish to use enFoldX with AlphaFold3 predictions, you must install AlphaFold3 following the instructions at https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md 
 
 After the installation you should have:
 - path to the AF3 parameters
 - path to downloaded databases
 - path to the docker/singularity container for running alphafold
 
-Please keep in mind that you must comply with the [TERMS OF USE](https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md) set by Deepmind in order to use AlphaFold3.
+Please keep in mind that you must additional comply with the [TERMS OF USE](https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md) set by Deepmind in order to use AlphaFold3.
 
 ### Installing this repository
 Clone the repository:
@@ -37,6 +40,8 @@ The python requirements to run these scripts are minimal so instead of forcing y
 - tqdm
 
 ## Usage
+The example code here is for running complex binding predictions for a TCR:pmHC complex, although enFoldX can be adapted to any protein complex with some trivial changes.
+
 There are a few sequential steps to take in going from a TCR-pMHC sequence --> set of features:
 1) Format JSONs for running AlphaFold3 MSA for each unique sequence
 2) Run MSA on Input Sequences
@@ -46,7 +51,7 @@ There are a few sequential steps to take in going from a TCR-pMHC sequence --> s
 
 The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. The Folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well.
 
-### Step 0: Format TCR-pMHC sequences
+### Step 0: Format Sequences Input
 In order to run this pipeline, you will need a CSV that contains one row for every TCR-pMHC complex you wish to predict. Each row should have four columns containing the sequences of the TCRa, TCRb, MHC, and Peptide chains using 1-letter amino acid codes. By default, the pipeline assumes that the columns are named ["A_seq","B_seq","M_seq","P_seq"] respectively, although you can pass in custom column names using the optional flags to each script. If you are starting from VDJ+CDR3 calls, we recommend you use [stitchr](https://jamieheather.github.io/stitchr/index.html) to get full length TCRa and TCRb sequences. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/.
 
 
