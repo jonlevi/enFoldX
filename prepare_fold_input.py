@@ -4,6 +4,7 @@ import tqdm
 import os
 import argparse
 
+
 def main(args):
 
     try:
@@ -34,13 +35,15 @@ def main(args):
         print(f"Error reading CSV file: {e}")
 
     def map_seq_to_id(seq):
-        my_row = chain_map_df[chain_map_df['SEQ']==seq]
-        assert my_row.shape[0]==1, f"duplicate or missing entries found in chain_map for seq {seq}"
-        return my_row['ID'].values[0]
-    
-    seq_df['alpha_id'] = seq_df[args.alpha_col].apply(map_seq_to_id)
-    seq_df['beta_id'] = seq_df[args.beta_col].apply(map_seq_to_id)
-    seq_df['mhc_id'] = seq_df[args.mhc_col].apply(map_seq_to_id)
+        my_row = chain_map_df[chain_map_df["SEQ"] == seq]
+        assert (
+            my_row.shape[0] == 1
+        ), f"duplicate or missing entries found in chain_map for seq {seq}"
+        return my_row["ID"].values[0]
+
+    seq_df["alpha_id"] = seq_df[args.alpha_col].apply(map_seq_to_id)
+    seq_df["beta_id"] = seq_df[args.beta_col].apply(map_seq_to_id)
+    seq_df["mhc_id"] = seq_df[args.mhc_col].apply(map_seq_to_id)
 
     assert os.path.exists(args.MSA_output_dir), f"{args.MSA_output_dir} not found"
 
@@ -49,13 +52,17 @@ def main(args):
         os.makedirs(args.output_dir)
 
     fold_input_path = args.output_dir
-    
+
     def get_msa(id):
-        folder_path = os.path.join(args.MSA_output_dir,id)
-        json_path =  os.path.join(folder_path,f"{id}_data.json")
+        folder_path = os.path.join(args.MSA_output_dir, id)
+        json_path = os.path.join(folder_path, f"{id}_data.json")
         with open(json_path, "r") as jf:
             msa_data = json.load(jf)["sequences"][0]["protein"]
-            return (msa_data["unpairedMsa"], msa_data["templates"], msa_data["sequence"])
+            return (
+                msa_data["unpairedMsa"],
+                msa_data["templates"],
+                msa_data["sequence"],
+            )
 
     chain_base_dict = {
         "id": "",
@@ -68,7 +75,9 @@ def main(args):
     try:
         model_seeds = [int(s) for s in args.af3_seeds.split(",")]
     except Exception as e:
-        print("Could not process the input for af3-seeds correctly. Please set it to a comma-separated-string of integers like 1,2,3")
+        print(
+            "Could not process the input for af3-seeds correctly. Please set it to a comma-separated-string of integers like 1,2,3"
+        )
         raise e
 
     base_dict = {
@@ -80,7 +89,7 @@ def main(args):
     }
 
     # Write the files
-    for i, (idx,row) in tqdm.tqdm(enumerate(seq_df.iterrows())):
+    for i, (idx, row) in tqdm.tqdm(enumerate(seq_df.iterrows())):
 
         a_id = row["alpha_id"]
         b_id = row["beta_id"]
@@ -94,7 +103,7 @@ def main(args):
         this_af_input["sequences"] = []
         this_af_input["name"] = f"index_{idx}"
 
-        j_path = os.path.join(fold_input_path,f"{this_af_input['name']}.json")
+        j_path = os.path.join(fold_input_path, f"{this_af_input['name']}.json")
 
         # alpha chain
         alpha_chain = chain_base_dict.copy()
@@ -149,9 +158,10 @@ def main(args):
             json.dump(this_af_input, newf)
 
 
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
 
     parser.add_argument(
         "-s",
@@ -218,7 +228,7 @@ if __name__ == "__main__":
         type=str,
         required=False,
         help="comma-separated string of seeds to input to AF3",
-        default="1,2,5,10"
+        default="1,2,5,10",
     )
 
     parser.add_argument(
