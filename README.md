@@ -190,3 +190,6 @@ You can see the example output in `examples/enfoldx_extracted_features`
 
 ### From these features, you can then train models to predict binding. We do not include code for that in this repository, but you can see our paper for more on train/test splits and on publicly available data. 
 
+## Other Misc. Code
+You can also run the rmsd calculation that we use for the specific scenario of comparing two different TCR:pMHC complexes to each other. We use this in the first section of our paper when comparing mutant peptides to wild-type peptides for the same TCR and MHC. You will first need to `pip install biopython`, and then open `rmsd_calculation.py`, change the paths of s1 and s2 to the two structures you want to compare, and run `python rmsd_calculation.py`. 
+
