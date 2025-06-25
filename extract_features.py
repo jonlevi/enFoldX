@@ -126,9 +126,15 @@ def main(args):
     best_idx = all_results_df.groupby(by=["original_index"],dropna=False)['af3_ranking'].idxmax()
     best_results_df = all_results_df.loc[best_idx].drop(columns=['af3_seed', 'af3_sample', 'af3_ranking']).reset_index().drop(columns='index')  
     
+    ensemble = all_results_df.groupby(by=["original_index"], dropna=False).agg(['mean', 'std'])
+    ensemble.columns = [f"{col}_{stat}" for col, stat in ensemble.columns]
+    columns_to_drop = [col for col in ensemble.columns if col.startswith(('af3_seed', 'af3_sample', 'af3_ranking'))]
+    ensemble = ensemble.drop(columns=columns_to_drop).reset_index()
+
     all_results_df.to_csv(os.path.join(args.output_dir, 'all_structures_features.csv'))
     avg_results_df.to_csv(os.path.join(args.output_dir, 'avg_features.csv'))
     best_results_df.to_csv(os.path.join(args.output_dir, 'best_features.csv'))
+    ensemble.to_csv(os.path.join(args.output_dir, 'ensemble_features.csv'))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)

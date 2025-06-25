@@ -7,7 +7,7 @@ You can see our paper here <>:
 
 This repo provides code for a pipeline to run enFoldX. The current implementation of enFoldX uses AlphaFold3 and runs predictions for complex binding betweens TCRs and peptide-MHC complexes. 
 
-![Project Banner](https://github.com/jonlevi/af3_tcr_pipeline/blob/main/af3_process_parallel.png) 
+![Project Banner](https://github.com/jonlevi/af3_tcr_pipeline/blob/main/enfoldx_architechture.png) 
 
 ## 📚 Table of Contents
 - [Terms of use](#terms-of-use)
@@ -42,6 +42,15 @@ The python requirements to run these scripts are minimal so instead of forcing y
 - pandas
 - tqdm
 
+### Configure AlphaFold Paths:
+Open `af3_config.sh` and replace the stubbed out paths with the correct paths that contain the AlphaFold3 installation from above:
+```
+ALPHAFOLD_DIR="path/to/alphafold3"
+DATABASE_DIR="path/to/public_databases"
+WEIGHTS_DIR="path/to/weights"
+CONTAINER_PATH="path/to/container"
+```
+
 ## Usage
 The example code here is for running complex binding predictions for a TCR:pmHC complex, although enFoldX can be adapted to any protein complex with some trivial changes.
 
@@ -52,13 +61,13 @@ There are a few sequential steps to take in going from a TCR-pMHC sequence --> s
 4) Run AlphaFold3 Folding on Input Sequences
 5) Extract Features from Predicted Structures and Confidence Metadata
 
-The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. The Folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well.
+The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. The Folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well. This README goes through a full example of going from TCR:pMHC sequences --> enFoldX features. All of the data for the examples can be found in `examples/`
 
 ### Step 0: Format Sequences Input
 In order to run this pipeline, you will need a CSV that contains one row for every TCR-pMHC complex you wish to predict. Each row should have four columns containing the sequences of the TCRa, TCRb, MHC, and Peptide chains using 1-letter amino acid codes. By default, the pipeline assumes that the columns are named ["A_seq","B_seq","M_seq","P_seq"] respectively, although you can pass in custom column names using the optional flags to each script. If you are starting from VDJ+CDR3 calls, we recommend you use [stitchr](https://jamieheather.github.io/stitchr/index.html) to get full length TCRa and TCRb sequences. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/.
 
 
-An example file can be found in `examples/example_input_tcr_pmhcs.csv`
+Our tutorial example file can be found in `examples/example_input_tcr_pmhcs.csv`
 
 ### Step 1: Format JSONs for running AlphaFold3 MSA for each unique sequence
 ```bash
@@ -78,19 +87,19 @@ options:
   -o OUTPUT_DIR, --output-dir OUTPUT_DIR
                         Directory to place output JSON files
 ```
-#### Example:
-```python prepare_msa_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/msa_input_example```
+#### Tutorial Example:
+```python prepare_msa_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/af3_msa_inputs```
 
 This script will write out one JSON per unique TCRa, TCRb, and MHC sequence in the data, as well as a metadata file mapping the sequences to their chain IDs/JSON paths. 
 
-You can see what a successful run looks like by looking at the output for the example above in `examples/msa_input_example/`
+You can see what a successful run looks like by looking at the output for the tutorial in `examples/af3_msa_inputs`
 
 
 ### Step 2: Run MSA on Input Sequences
 You will run the AlphaFold3 container on `--no-run-inference` mode once per MSA JSON that was created. It is beneficial to run this in parallel. 
-An example for what this might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found in `slurm_af3_msa_example.sh`.
+An example for what this might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found for the tutorial data in `slurm_af3_msa_example.sh`. If you use this submission script, make sure to adjust the partition name, the array size, and the input/output paths to match your preferences/requirements. 
 
-You can see what a successful run looks like by looking at the output for the example above in `examples/msa_output_example/` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser).
+You can see what a successful run looks like by looking at the output for the tutorial above in `examples/af3_msa_outputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser). There will be one JSON per unique chain (except for peptides which don't get MSA), and a metadata chain mapping file to map the MSA output to the original sequences. (You will need this chain_id_map for the next step)
 
 ### Step 3: Collect MSA results and Format JSONs per TCR-pMHC for running AlphaFold3 Folding
 ```bash
@@ -126,17 +135,17 @@ You still need the original sequences file from Step 0 and you will also need:
 You can choose how many [random seeds](https://github.com/google-deepmind/alphafold3/blob/main/docs/input.md#random-seeds) to use in the AF3 inference. By default, we use 5 seeds per complex. You can add more or remove them by changing the `--af3-seeds` flag. Note that each additional seeds adds about an additional 1-2 minutes at minimum per complex to the runtime, but your predictive accuracy may improve with more seeds. See the our paper for more!
 
 #### Example:
-Following our previous example data:
+Following our previous tutorial data:
 ```
-python prepare_fold_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/fold_input_example --chain-id-map examples/msa_input_example/chain_ids_to_sequences.txt --MSA-output-dir examples/msa_output_example/MSA
+python prepare_fold_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/af3_fold_inputs --chain-id-map examples/af3_msa_inputs/chain_ids_to_sequences.txt --MSA-output-dir examples/af3_msa_outputs
 ```
-You can see what a successful run looks like by looking at the output for the example above in `examples/fold_input_example/` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser).
+You can see what a successful run looks like by looking at the output for the tutorial in `examples/af3_fold_inputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser).
 
 ### Step 4: Run AlphaFold3 Folding on Input Sequences
 You will run the AlphaFold3 container on `--norun_data_pipeline` mode once per TCR-pMHC input JSON that was created. This requires a GPU to run, see the AlphaFold3 documentation for more detaiils. It is beneficial to run this in parallel. 
-An example for what this might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found in `slurm_af3_fold_example.sh`.
+An example for what this might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found for the tutorial data in `slurm_af3_fold_example.sh`. There will be one directory per row in the original sequences CSV file. Each directory will contain 5 X Nseeds subdirectories for each prediction, and will contain the 3D structure .cif file as well as the confidence metadata JSONs. The output will also contain a ranking scores CSV file that ranks the outputs structures, and also a copy of the results for the "best" ranked structure is saved at the top level.
 
-You can see what a successful run looks like by looking at the output for the example above in `examples/fold_output_example/`. For more information on the output of AlphaFold3, see [the docs](https://github.com/google-deepmind/alphafold3/blob/main/docs/output.md). 
+You can see what a successful run looks like by looking at the output for the example above in `examples/af3_fold_outputs`. For more information on the output of AlphaFold3, see [their docs](https://github.com/google-deepmind/alphafold3/blob/main/docs/output.md). 
 
 ### Step 5: Extract Features from Predicted Structures and Confidence Metadata
 ```bash
@@ -163,21 +172,21 @@ options:
 ```
 You still need the original sequences file from Step 0 and you will also need:
 
-1) the path that the chain id map was written to in Step 1 and 
-2) the directory that AlphaFold3 wrote the output to  (this is the output of step 4)
-3) the choice of random seeds that you used in step 3 (if you did not use the default), because AF3 outputs 5 new structures for every seed you choose
+1) the directory that AlphaFold3 wrote the output to  (this is the output of step 4)
+2) the choice of random seeds that you used in step 3 (if you did not use the default), as that determines the file system structure for the outputs
 
 This script will output 3 CSV files in the output directory:
-1) all_structures_features.csv - this contains a row for every predicted structure. So for example, if you had 5 seeds, then you will have 20 rows per TCR-pMHC input (5 seeds x 5 samples/per seed)
+1) all_structures_features.csv - this contains a row for every predicted structure. So for example, if you had 5 seeds, then you will have 25 rows per TCR-pMHC input (5 seeds x 5 samples/per seed)
 2) avg_features.csv -  this contains a row for every TCR-pMHC input, where each feature is the mean of that feature across all structures predicted for that TCR-pMHC
 3) best_features.csv - this contains a row for every TCR-pMHC input, where each feature is taken from the structure that was ranked the highest by AF3 for that TCR-pMHC
+4) ensemble_features.csv -  this contains a row for every TCR-pMHC input, where each feature is saved once with the mean of that feature across all structures predicted for that TCR-pMHC, and once with the standard deviation. This is the "structure ensemble" from the paper.
 
 #### Example
 Following our previous example data:
 ```
-python extract_features.py -s examples/example_input_tcr_pmhcs.csv -o examples/features_output_example --af-output-dir examples/fold_output_example
+python extract_features.py -s examples/example_input_tcr_pmhcs.csv --af-output-dir examples/af3_fold_outputs -o examples/enfoldx_extracted_features
 ```
-You can see the example output in `examples/features_output_example`
+You can see the example output in `examples/enfoldx_extracted_features`
 
-
+### From these features, you can then train models to predict binding. We do not include code for that in this repository, but you can see our paper for more on train/test splits and on publicly available data. 
 

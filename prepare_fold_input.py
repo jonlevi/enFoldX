@@ -48,10 +48,7 @@ def main(args):
         print(f"{args.output_dir} does not exist... Creating new directory")
         os.makedirs(args.output_dir)
 
-    fold_input_path = os.path.join(args.output_dir, "fold_input")
-
-    if not os.path.exists(fold_input_path):
-        os.mkdir(fold_input_path)
+    fold_input_path = args.output_dir
     
     def get_msa(id):
         folder_path = os.path.join(args.MSA_output_dir,id)
