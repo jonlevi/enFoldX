@@ -7,7 +7,7 @@ You can see our paper here <>:
 
 This repo provides code for a pipeline to run enFoldX. The current implementation of enFoldX uses AlphaFold3 and runs predictions for complex binding betweens TCRs and peptide-MHC complexes. 
 
-![Project Banner](https://github.com/jonlevi/af3_tcr_pipeline/blob/main/enfoldx_architechture.png) 
+![Project Banner](https://github.com/jonlevi/af3_tcr_pipeline/blob/main/enfoldx_diagram.pdf) 
 
 ## 📚 Table of Contents
 - [Terms of use](#terms-of-use)
