@@ -35,6 +35,7 @@ Clone the repository:
 git clone https://github.com/jonlevi/enFoldX.git
 cd enFoldX
 ```
+Alternatively, you can download the zip file directly using the "download" option on the repository options. Either clone or download should complete in ~1 minute.
 
 ### python reqs
 The python requirements to run these scripts are minimal so instead of forcing you to install a specific list of reqiurements, just make sure you run these scripts in any environment that has:
