@@ -15,7 +15,7 @@ This repo provides code for a pipeline to run enFoldX. The current implementatio
 - [Usage](#usage)
 
 ## Terms of Use
-By using enFoldX, you are agreeing to the terms set in the enFoldX [Terms of Use](TERMS_OF_USE.md).
+By using enFoldX, you are agreeing to the terms set in the enFoldX [Terms of Use](TERMS_OF_USE.md), and the terms of use set by AlphaFold3 (see below).
 
 ## Installation
 ### Installing AlphaFold3
