@@ -40,8 +40,7 @@ Each of these steps is detailed below:
 In order to run this pipeline, you will need a CSV that contains one row for every TCR-pMHC complex you wish to predict. If you already have full length TCR sequences, you can skip this step. For instructions on how to go from `V`, `J`, `CDR3` calls to full length TCR sequences, have a look at our [tutorial](https://github.com/jonlevi/enFoldX/blob/main/docs/format_tcr_sequences.md).
 
 ### MHC
-## Get MHC/HLA Sequence Information
-You will also need the full length sequences for any MHC chains you want to model. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/. For convenience, we include the sequences of a few common HLA alleles in this repo at <>
+You will also need the full length sequences for any MHC/HLA chains you want to model. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/. For convenience, we include the sequences of a few common HLA alleles in this repo at <>
 
 ## Run AlphaFold3 Predictions
 
