@@ -7,57 +7,11 @@ This repo provides code for a pipeline to run enFoldX. This implementation of en
 
 ![Project Banner](https://github.com/jonlevi/af3_tcr_pipeline/blob/main/enfoldx_diagram.png) 
 
-## 📚 Table of Contents
-- [Terms of use](#terms-of-use)
-- [Installation](#installation)
-- [Usage](#usage)
 
 ## Terms of Use
 By using enFoldX, you are agreeing to the terms set in the enFoldX [Terms of Use](TERMS_OF_USE.md), and the terms of use set by AlphaFold3 (see below).
 
-## Getting Started
-To run EnFoldX, you need to essentially run 3 main steps:
-1) [Prepare sequence inputs](#prepare-sequence-inputs)
-2) [Run AlphaFold3 Predictions](#run-alphafold3-predictions)_
-3) [Extract features from AlphaFold3 results and predict binding](#extract-features-from-alphafold3-results-and-predict-binding)
-
-Each of these steps is detailed below:
-
-## Prepare sequence inputs
-
-### TCRs
-In order to run this pipeline, you will need a CSV that contains one row for every TCR-pMHC complex you wish to predict. If you already have full length TCR sequences, you can skip this step. Usually, you will only have `V`,`J`, and `CDR3` calls from sequencing. We prefer to use the full length TCR sequences that come from the output of the useful tool [stitchr](https://jamieheather.github.io/stitchr/index.html), which reconstructs full-length TCR sequences from minimal input data. We will be using the command-line utility `thimble`, a wrapper included with `stitchr`, for batch processing of TCR alpha and beta chains. Before you begin, ensure you have installed `stitchr` and the necessary data (for the genome of interest) by following the instructions [here] (https://jamieheather.github.io/stitchr/installation.html#installation).
-
-To start, you should have a CSV that has paired chain TCR information for each TCR you are interested in. These should include the 6 columns: 
-`['TRAV',	'TRAJ',	'TRA_CDR3',	'TRBV',	'TRBJ',	'TRB_CDR3']`. Thimble expects the input file to have a specific format (see [here](https://github.com/JamieHeather/stitchr/blob/main/templates/input_template_TRA-TRB.tsv) for a template).
-
-To run thimble, you can pass in the file with the TCR calls and the appropriate species. For example:
-`thimble -i my_human_tcrs.tsv -o stitchr_out_human_tcrs.tsv -r ab -s HUMAN`. The output will include columns containing the full AA sequences of the TCRa and TCRb chains using 1-letter amino acid codes.
-
-### MHC
-## Get MHC/HLA Sequence Information
-You will also need the full length sequences for any MHC chains you want to model. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/. For convenience, we include the sequences of a few common HLA alleles in this repo at <>
-
-## Run AlphaFold3 Predictions
-
-There are currently 2 ways to run AlphaFold3 predictions:
-a) local installation of AF3
-b) AF3 prediction server
-
-
-
-## Installation
-### Installing AlphaFold3
-If you wish to use enFoldX with AlphaFold3 predictions, you must install AlphaFold3 following the instructions at https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md 
-
-After the installation you should have:
-- path to the AF3 parameters
-- path to downloaded databases
-- path to the docker/singularity container for running alphafold
-
-Please keep in mind that you must additional comply with the [TERMS OF USE](https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md) set by Deepmind in order to use AlphaFold3. Please also keep in mind that in order to run AlphaFold3 efficiently, you may need access to specialized hardware (see [https://github.com/google-deepmind/alphafold3/blob/main/docs/performance.md](https://github.com/google-deepmind/alphafold3/blob/main/docs/performance.md)). 
-
-### Installing this repository
+## Installing this repository
 Clone the repository:
 
 ```bash
@@ -72,7 +26,46 @@ The python requirements to run these scripts are minimal so instead of forcing y
 - pandas
 - tqdm
 
-### Configure AlphaFold Paths:
+## Getting Started
+To run EnFoldX, you need to essentially run 3 main steps:
+1) [Prepare sequence inputs](#prepare-sequence-inputs)
+2) [Run AlphaFold3 Predictions](#run-alphafold3-predictions)_
+3) [Extract features from AlphaFold3 results and predict binding](#extract-features-from-alphafold3-results-and-predict-binding)
+
+Each of these steps is detailed below:
+
+## Prepare sequence inputs
+
+### TCRs
+In order to run this pipeline, you will need a CSV that contains one row for every TCR-pMHC complex you wish to predict. If you already have full length TCR sequences, you can skip this step. For instructions on how to go from `V`, `J`, `CDR3` calls to full length TCR sequences, have a look at our [tutorial](https://github.com/jonlevi/enFoldX/blob/main/docs/format_tcr_sequences.md).
+
+### MHC
+## Get MHC/HLA Sequence Information
+You will also need the full length sequences for any MHC chains you want to model. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/. For convenience, we include the sequences of a few common HLA alleles in this repo at <>
+
+## Run AlphaFold3 Predictions
+
+There are currently 2 ways to run AlphaFold3 predictions:
+a) local installation of AF3
+b) AF3 prediction server
+
+** We highly recommend using local installation of AF3 for EnFoldX, as it allows for the incorporation of multiple seeds at a time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you could theoretically run multiple identical jobs with different input seeds, and then collect the results yourself.
+
+Nevertheless, we break down how to use EnFoldX for either the installed AF3 as for the server AF3:
+
+
+### Locally Installing AlphaFold3
+If you wish to use enFoldX with AlphaFold3 predictions on your own compute system, you first must install AlphaFold3 following the instructions at https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md. As is outlined in detail there, you will need to request access to the AF3 parameters, and install about 1TB of data along with a docker/singularity container. 
+
+After the installation you should have the following:
+- path to the AF3 parameters
+- path to downloaded databases
+- path to the docker/singularity container for running alphafold
+
+Please keep in mind that you must additional comply with the [TERMS OF USE](https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md) set by Deepmind in order to use AlphaFold3. Please also keep in mind that in order to run AlphaFold3 efficiently, you may need access to specialized hardware (see [https://github.com/google-deepmind/alphafold3/blob/main/docs/performance.md](https://github.com/google-deepmind/alphafold3/blob/main/docs/performance.md)). 
+
+
+#### Configure AlphaFold Paths:
 Open `af3_config.sh` and replace the stubbed out paths with the correct paths that contain the AlphaFold3 installation from above:
 ```
 ALPHAFOLD_DIR="path/to/alphafold3"
@@ -81,21 +74,17 @@ WEIGHTS_DIR="path/to/weights"
 CONTAINER_PATH="path/to/container"
 ```
 
-## Usage
-The example code here is for running complex binding predictions for a TCR:pmHC complex, although enFoldX can be adapted to any protein complex with some trivial changes.
+#### Local AF3 EnFoldX Predictions
 
 There are a few sequential steps to take in going from a TCR-pMHC sequence --> set of features:
 1) Format JSONs for running AlphaFold3 MSA for each unique sequence
 2) Run MSA on Input Sequences
 3) Collect MSA results and Format JSONs per TCR-pMHC for running AlphaFold3 Folding
-4) Run AlphaFold3 Folding on Input Sequences
-5) Extract Features from Predicted Structures and Confidence Metadata
+4) Run AlphaFold3 Container on Input JSONs
 
-The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. The Folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well. This README goes through a full example of going from TCR:pMHC sequences --> enFoldX features. All of the data for the examples can be found in `examples/`
+The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. The Folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well. This section goes through a full example of going from TCR:pMHC sequences --> enFoldX features. All of the data for the examples can be found in `examples/`
 
-### Step 0: 
-
-### Step 1: Format JSONs for running AlphaFold3 MSA for each unique sequence
+##### Step 1: Format JSONs for running AlphaFold3 MSA for each unique sequence
 ```bash
 usage: prepare_msa_input.py [-h] -s SEQUENCES_FILE [-a ALPHA_COL] [-b BETA_COL] [-m MHC_COL] [-p PEPTIDE_COL] -o OUTPUT_DIR
 options:
@@ -103,17 +92,17 @@ options:
   -s SEQUENCES_FILE, --sequences-file SEQUENCES_FILE
                         Path to input file with TCR-pMHC sequences
   -a ALPHA_COL, --alpha-col ALPHA_COL
-                        Name of column containing TCRa chain sequence in <--sequences-file> (default: A_seq)
+                        Name of column containing TCRa chain sequence in <--sequences-file> (default: TRA_AA)
   -b BETA_COL, --beta-col BETA_COL
-                        Name of column containing TCRb chain sequence in <--sequences-file> (default: B_seq)
+                        Name of column containing TCRb chain sequence in <--sequences-file> (default: TRB_AA)
   -m MHC_COL, --mhc-col MHC_COL
-                        Name of column containing MHC chain sequence in <--sequences-file> (default: M_seq)
+                        Name of column containing MHC chain sequence in <--sequences-file> (default: M_AA)
   -p PEPTIDE_COL, --peptide-col PEPTIDE_COL
-                        Name of column containing peptide sequence in <--sequences-file> (default: P_seq)
+                        Name of column containing peptide sequence in <--sequences-file> (default: P_AA)
   -o OUTPUT_DIR, --output-dir OUTPUT_DIR
                         Directory to place output JSON files
 ```
-#### Tutorial Example:
+*Example*:
 ```python prepare_msa_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/af3_msa_inputs```
 
 This script will write out one JSON per unique TCRa, TCRb, and MHC sequence in the data, as well as a metadata file mapping the sequences to their chain IDs/JSON paths. 
@@ -121,13 +110,13 @@ This script will write out one JSON per unique TCRa, TCRb, and MHC sequence in t
 You can see what a successful run looks like by looking at the output for the tutorial in `examples/af3_msa_inputs`
 
 
-### Step 2: Run MSA on Input Sequences
+##### Step 2: Run MSA on Input Sequences
 You will run the AlphaFold3 container on `--no-run-inference` mode once per MSA JSON that was created. It is beneficial to run this in parallel. 
 An example for what this might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found for the tutorial data in `slurm_af3_msa_example.sh`. If you use this submission script, make sure to adjust the partition name, the array size, and the input/output paths to match your preferences/requirements. 
 
 You can see what a successful run looks like by looking at the output for the tutorial above in `examples/af3_msa_outputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser). There will be one JSON per unique chain (except for peptides which don't get MSA), and a metadata chain mapping file to map the MSA output to the original sequences. (You will need this chain_id_map for the next step)
 
-### Step 3: Collect MSA results and Format JSONs per TCR-pMHC for running AlphaFold3 Folding
+##### Step 3: Collect MSA results and Format JSONs per TCR-pMHC for running AlphaFold3 Folding
 ```bash
 usage: prepare_fold_input.py [-h] -s SEQUENCES_FILE [-a ALPHA_COL] [-b BETA_COL] [-m MHC_COL] [-p PEPTIDE_COL] --chain-id-map CHAIN_ID_MAP --MSA-output-dir MSA_OUTPUT_DIR [--af3-seeds AF3_SEEDS]
                              -o OUTPUT_DIR
@@ -160,18 +149,22 @@ You still need the original sequences file from Step 0 and you will also need:
 
 You can choose how many [random seeds](https://github.com/google-deepmind/alphafold3/blob/main/docs/input.md#random-seeds) to use in the AF3 inference. By default, we use 5 seeds per complex. You can add more or remove them by changing the `--af3-seeds` flag. Note that each additional seeds adds about an additional 1-2 minutes at minimum per complex to the runtime, but your predictive accuracy may improve with more seeds. See the our paper for more!
 
-#### Example:
+*Example*:
 Following our previous tutorial data:
 ```
 python prepare_fold_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/af3_fold_inputs --chain-id-map examples/af3_msa_inputs/chain_ids_to_sequences.txt --MSA-output-dir examples/af3_msa_outputs
 ```
 You can see what a successful run looks like by looking at the output for the tutorial in `examples/af3_fold_inputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser).
 
-### Step 4: Run AlphaFold3 Folding on Input Sequences
+##### Step 4: Run AlphaFold3 Folding on Input Sequences
 You will run the AlphaFold3 container on `--norun_data_pipeline` mode once per TCR-pMHC input JSON that was created. This requires a GPU to run, see the AlphaFold3 documentation for more detaiils. It is beneficial to run this in parallel. 
 An example for what this might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found for the tutorial data in `slurm_af3_fold_example.sh`. There will be one directory per row in the original sequences CSV file. Each directory will contain 5 X Nseeds subdirectories for each prediction, and will contain the 3D structure .cif file as well as the confidence metadata JSONs. The output will also contain a ranking scores CSV file that ranks the outputs structures, and also a copy of the results for the "best" ranked structure is saved at the top level.
 
 You can see what a successful run looks like by looking at the output for the example above in `examples/af3_fold_outputs`. For more information on the output of AlphaFold3, see [their docs](https://github.com/google-deepmind/alphafold3/blob/main/docs/output.md). 
+
+
+
+## Extract
 
 ### Extract features from AlphaFold3 results and predict binding
 Step 5: Extract Features from Predicted Structures and Confidence Metadata
