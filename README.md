@@ -29,8 +29,10 @@ The python requirements to run these scripts are minimal so instead of forcing y
 ## Getting Started
 To run EnFoldX, you need to essentially run 3 main steps:
 1) [Prepare sequence inputs](#prepare-sequence-inputs)
-2) [Run AlphaFold3 Predictions](#run-alphafold3-predictions)_
-3) [Extract features from AlphaFold3 results and predict binding](#extract-features-from-alphafold3-results-and-predict-binding)
+2) [Run Structure Predictions](#run-alphafold3-predictions)
+   - [AF3 Installed Version](#locally-installing-alphafold3)_
+   - [AF3 Server Version] (#server-based-predictions)
+4) [Extract features from AlphaFold3 results and predict binding](#extract-features-from-alphafold3-results-and-predict-binding)
 
 Each of these steps is detailed below:
 
@@ -161,7 +163,8 @@ An example for what this might look like using [slurm](https://slurm.schedmd.com
 
 You can see what a successful run looks like by looking at the output for the example above in `examples/af3_fold_outputs`. For more information on the output of AlphaFold3, see [their docs](https://github.com/google-deepmind/alphafold3/blob/main/docs/output.md). 
 
-
+### Server Based Predictions
+tbd
 
 ## Extract
 
