@@ -1,9 +1,9 @@
 # enFoldX: Leveraging ensembles of predicted structures for complex binding prediction
 
 
-enFoldX (**En**semble of **Fold**ed Comple**x**es) enables the evaluation of large datasets of predicted structures simultaneously as it extracts distributions of high dimensional confidence features, including customized biophysical features. 
+enFoldX (**En**semble of **Fold**ed Comple**X**es) enables the binding prediction of large datasets of input sequences by extracting distributions of high dimensional confidence features from ensembles of predicted structures.
 
-This repo provides code for a pipeline to run enFoldX. The current implementation of enFoldX uses AlphaFold3 and runs predictions for complex binding betweens TCRs and peptide-MHC complexes. 
+This repo provides code for a pipeline to run enFoldX. This implementation of enFoldX uses AlphaFold3 and runs predictions for complex binding for TCR-peptide-MHC complexes. 
 
 ![Project Banner](https://github.com/jonlevi/af3_tcr_pipeline/blob/main/enfoldx_diagram.png) 
 
@@ -17,26 +17,32 @@ By using enFoldX, you are agreeing to the terms set in the enFoldX [Terms of Use
 
 ## Getting Started
 To run EnFoldX, you need to essentially run 3 main steps:
-1) Prepare sequence inputs
-2) Run AlphaFold3 (see below)
-3) Extract Features and Predict Binding from AlphaFold3 Results
+1) [Prepare sequence inputs](#prepare-sequence-inputs)
+2) [Run AlphaFold3 Predictions](#run-alphafold3-predictions)_
+3) [Extract features from AlphaFold3 results and predict binding](#extract-features-from-alphafold3-results-and-predict-binding)
 
 Each of these steps is detailed below:
 
-##  Prepare sequence inputs
+## Prepare sequence inputs
 
 ### TCRs
 In order to run this pipeline, you will need a CSV that contains one row for every TCR-pMHC complex you wish to predict. If you already have full length TCR sequences, you can skip this step. Usually, you will only have `V`,`J`, and `CDR3` calls from sequencing. We prefer to use the full length TCR sequences that come from the output of the useful tool [stitchr](https://jamieheather.github.io/stitchr/index.html), which reconstructs full-length TCR sequences from minimal input data. We will be using the command-line utility `thimble`, a wrapper included with `stitchr`, for batch processing of TCR alpha and beta chains. Before you begin, ensure you have installed `stitchr` and the necessary data (for the genome of interest) by following the instructions [here] (https://jamieheather.github.io/stitchr/installation.html#installation).
 
 To start, you should have a CSV that has paired chain TCR information for each TCR you are interested in. These should include the 6 columns: 
-`[TRAV,	TRAJ,	TRA_CDR3,	TRBV,	TRBJ,	TRB_CDR3]`. Thimble expects the input file to have a specific format (see [here](https://github.com/JamieHeather/stitchr/blob/main/templates/input_template_TRA-TRB.tsv) for a template).
+`['TRAV',	'TRAJ',	'TRA_CDR3',	'TRBV',	'TRBJ',	'TRB_CDR3']`. Thimble expects the input file to have a specific format (see [here](https://github.com/JamieHeather/stitchr/blob/main/templates/input_template_TRA-TRB.tsv) for a template).
 
 To run thimble, you can pass in the file with the TCR calls and the appropriate species. For example:
-`thimble -i my_human_tcrs.tsv -o stitchr_out_human_tcrs.tsv -r ab -s HUMAN`. The output will include columns containing the full AA sequences of the TCRa and TCRb chains using 1-letter amino acid codes
+`thimble -i my_human_tcrs.tsv -o stitchr_out_human_tcrs.tsv -r ab -s HUMAN`. The output will include columns containing the full AA sequences of the TCRa and TCRb chains using 1-letter amino acid codes.
 
 ### MHC
 ## Get MHC/HLA Sequence Information
 You will also need the full length sequences for any MHC chains you want to model. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/. For convenience, we include the sequences of a few common HLA alleles in this repo at <>
+
+## Run AlphaFold3 Predictions
+
+There are currently 2 ways to run AlphaFold3 predictions:
+a) local installation of AF3
+b) AF3 prediction server
 
 
 
@@ -167,7 +173,8 @@ An example for what this might look like using [slurm](https://slurm.schedmd.com
 
 You can see what a successful run looks like by looking at the output for the example above in `examples/af3_fold_outputs`. For more information on the output of AlphaFold3, see [their docs](https://github.com/google-deepmind/alphafold3/blob/main/docs/output.md). 
 
-### Step 5: Extract Features from Predicted Structures and Confidence Metadata
+### Extract features from AlphaFold3 results and predict binding
+Step 5: Extract Features from Predicted Structures and Confidence Metadata
 ```bash
 usage: extract_features.py [-h] -s SEQUENCES_FILE [-a ALPHA_COL] [-b BETA_COL] [-m MHC_COL] [-p PEPTIDE_COL] --af-output-dir AF_OUTPUT_DIR [--af3-seeds AF3_SEEDS] -o OUTPUT_DIR
 
