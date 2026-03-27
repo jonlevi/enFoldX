@@ -1,9 +1,7 @@
 # enFoldX: Leveraging ensembles of predicted structures for complex binding prediction
 
 
-enFoldX (**En**semble of **Fold**ed Comple**x**es) enables the evaluation of large datasets of predicted structures simultaneously as it extracts distributions of high dimensional confidence features, including customized biophysical features. We found these features varied significantly between TCR:pMHC pairs of differing T cell reactivity, implying that binders and non-binders are separable in feature space. We then use the resultant ensemble of features across multiple generated structures to create a binding model, analogous to an energy function in statistical physics. The enFoldX approach generalizes in a dataset agnostic way - for example, models trained on human data can classify binder TCR:pMHC pairs in mouse data. Moreover, we found, for the first time, that our structure-guided models trained on publicly available data can generalize to discriminate epitopes that differ by only one mutation away from self, the resolution needed for predicting mutation-derived cancer neoantigens.
-
-You can see our paper here <>:
+enFoldX (**En**semble of **Fold**ed Comple**x**es) enables the evaluation of large datasets of predicted structures simultaneously as it extracts distributions of high dimensional confidence features, including customized biophysical features. 
 
 This repo provides code for a pipeline to run enFoldX. The current implementation of enFoldX uses AlphaFold3 and runs predictions for complex binding betweens TCRs and peptide-MHC complexes. 
 
@@ -16,6 +14,31 @@ This repo provides code for a pipeline to run enFoldX. The current implementatio
 
 ## Terms of Use
 By using enFoldX, you are agreeing to the terms set in the enFoldX [Terms of Use](TERMS_OF_USE.md), and the terms of use set by AlphaFold3 (see below).
+
+## Getting Started
+To run EnFoldX, you need to essentially run 3 main steps:
+1) Prepare sequence inputs
+2) Run AlphaFold3 (see below)
+3) Extract Features and Predict Binding from AlphaFold3 Results
+
+Each of these steps is detailed below:
+
+##  Prepare sequence inputs
+
+### TCRs
+In order to run this pipeline, you will need a CSV that contains one row for every TCR-pMHC complex you wish to predict. If you already have full length TCR sequences, you can skip this step. Usually, you will only have `V`,`J`, and `CDR3` calls from sequencing. We prefer to use the full length TCR sequences that come from the output of the useful tool [stitchr](https://jamieheather.github.io/stitchr/index.html), which reconstructs full-length TCR sequences from minimal input data. We will be using the command-line utility `thimble`, a wrapper included with `stitchr`, for batch processing of TCR alpha and beta chains. Before you begin, ensure you have installed `stitchr` and the necessary data (for the genome of interest) by following the instructions [here] (https://jamieheather.github.io/stitchr/installation.html#installation).
+
+To start, you should have a CSV that has paired chain TCR information for each TCR you are interested in. These should include the 6 columns: 
+`[TRAV,	TRAJ,	TRA_CDR3,	TRBV,	TRBJ,	TRB_CDR3]`. Thimble expects the input file to have a specific format (see [here](https://github.com/JamieHeather/stitchr/blob/main/templates/input_template_TRA-TRB.tsv) for a template).
+
+To run thimble, you can pass in the file with the TCR calls and the appropriate species. For example:
+`thimble -i my_human_tcrs.tsv -o stitchr_out_human_tcrs.tsv -r ab -s HUMAN`. The output will include columns containing the full AA sequences of the TCRa and TCRb chains using 1-letter amino acid codes
+
+### MHC
+## Get MHC/HLA Sequence Information
+You will also need the full length sequences for any MHC chains you want to model. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/. For convenience, we include the sequences of a few common HLA alleles in this repo at <>
+
+
 
 ## Installation
 ### Installing AlphaFold3
@@ -64,11 +87,7 @@ There are a few sequential steps to take in going from a TCR-pMHC sequence --> s
 
 The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. The Folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well. This README goes through a full example of going from TCR:pMHC sequences --> enFoldX features. All of the data for the examples can be found in `examples/`
 
-### Step 0: Format Sequences Input
-In order to run this pipeline, you will need a CSV that contains one row for every TCR-pMHC complex you wish to predict. Each row should have four columns containing the sequences of the TCRa, TCRb, MHC, and Peptide chains using 1-letter amino acid codes. By default, the pipeline assumes that the columns are named ["A_seq","B_seq","M_seq","P_seq"] respectively, although you can pass in custom column names using the optional flags to each script. If you are starting from VDJ+CDR3 calls, we recommend you use [stitchr](https://jamieheather.github.io/stitchr/index.html) to get full length TCRa and TCRb sequences. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/.
-
-
-Our tutorial example file can be found in `examples/example_input_tcr_pmhcs.csv`
+### Step 0: 
 
 ### Step 1: Format JSONs for running AlphaFold3 MSA for each unique sequence
 ```bash
