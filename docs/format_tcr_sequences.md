@@ -9,8 +9,17 @@ We prefer to use the full length TCR sequences that come from the output of the 
 To start, you should have a CSV that has paired chain TCR information for each TCR you are interested in. These should include the 6 columns: 
 `['TRAV',	'TRAJ',	'TRA_CDR3',	'TRBV',	'TRBJ',	'TRB_CDR3']`. Thimble expects the input file to have a specific format (see [here](https://github.com/JamieHeather/stitchr/blob/main/templates/input_template_TRA-TRB.tsv) for a template).
 
+Here is some example code to put your dataframe in the appropriate format, starting from some pandas dataframe with the apporpriate data:
+```
+order=[
+    'TCR_name','TRAV','TRAJ','TRA_CDR3',
+    'TRBV','TRBJ','TRB_CDR3','TRAC','TRBC','TRA_leader','TRB_leader','Linker',
+          'Link_order','TRA_5_prime_seq','TRA_3_prime_seq','TRB_5_prime_seq','TRB_3_prime_seq']
+my_df[order].to_csv('path/to/stitchr_input.tsv',sep='\t',index=False)
+```
+
 To run thimble, you can pass in the file with the TCR calls and the appropriate species. For example:
-`thimble -i my_human_tcrs.tsv -o stitchr_out_human_tcrs.tsv -r ab -s HUMAN`. 
+`thimble -i path/to/stitchr_input.tsv.tsv -o path/to/stitchr_out_human_tcrs.tsv -r ab -s HUMAN`. 
 
 The output will include columns containing the full AA sequences of the TCRa and TCRb chains using 1-letter amino acid codes, which can then be used as the input for AF3 in the next step of the pipeline.
 
