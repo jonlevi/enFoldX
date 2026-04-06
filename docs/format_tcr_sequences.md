@@ -9,7 +9,7 @@ We prefer to use the full length TCR sequences that come from the output of the 
 To start, you should have a CSV that has paired chain TCR information for each TCR you are interested in. These should include the 6 columns: 
 `['TRAV',	'TRAJ',	'TRA_CDR3',	'TRBV',	'TRBJ',	'TRB_CDR3']`. Thimble expects the input file to have a specific format (see [here](https://github.com/JamieHeather/stitchr/blob/main/templates/input_template_TRA-TRB.tsv) for a template).
 
-You can most likely leave many of the input columns blank, unless you have specific input data that is more than just VDJ sequencing. If you do have TRAC/TRBC calls, then you should use those instead of leaving that columns blank. Otherwise, stitchr will try to to infer the best one to use.
+You can leave the other input columns blank, unless you have specific input data that is more than just VDJ sequencing. If you do have TRAC/TRBC calls, then you should use those instead of leaving that columns blank. Otherwise, stitchr will try to to infer the best one to use.
 
 Here is some example code to put your dataframe in the appropriate format, starting from some pandas dataframe with the apporpriate data:
 ```
