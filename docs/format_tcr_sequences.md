@@ -9,7 +9,7 @@ We prefer to use the full length TCR sequences that come from the output of the 
 To start, you should have a CSV that has paired chain TCR information for each TCR you are interested in. These should include the 6 columns: 
 `['TRAV',	'TRAJ', 'TRA_CDR3','TRBV', 'TRBJ', 'TRB_CDR3']`. Thimble expects the input file to have a specific format (see [here](https://github.com/JamieHeather/stitchr/blob/main/templates/input_template_TRA-TRB.tsv) for a template).
 
-You can leave the other input columns blank, although you are welcome to include additional data if you have it. If you do have TRAC/TRBC calls, then you should use those instead of leaving that columns blank. Otherwise, stitchr will try to to infer the best one to use.
+You can leave the other input columns blank, although you are welcome to include additional data if you have it. If you do have TRAC/TRBC calls, then you should use those instead of leaving that columns blank. Otherwise, stitchr will try to to infer the best one to use.[^1]
 
 Here is some example code to put your dataframe in the appropriate format, starting from some pandas dataframe with the apporpriate data:
 ```
@@ -27,4 +27,6 @@ To run thimble, you can pass in the file with the TCR calls and the appropriate 
 `thimble -i path/to/stitchr_input.tsv.tsv -o path/to/stitchr_out_human_tcrs.tsv -r ab -s HUMAN`. 
 
 The output will include columns containing the full AA sequences of the TCRa and TCRb chains using 1-letter amino acid codes, which can then be used as the input for AF3 in the next step of the pipeline.
+
+[^1]: For human and mouse TCRs, the script will use the TRBC gene located in the same cluster as the J gene (i.e. TRBJ1-1 through TRBJ1-6 will get TRBC1, while TRBJ2-1 through TRBJ2-7 will get TRBC2). This can be overriden (see optional arguments). For all other species you’ll need to explicitly state which constant region you want used.
 
