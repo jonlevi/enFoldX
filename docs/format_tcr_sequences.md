@@ -28,5 +28,5 @@ To run thimble, you can pass in the file with the TCR calls and the appropriate 
 
 The output will include columns containing the full AA sequences of the TCRa and TCRb chains using 1-letter amino acid codes, which can then be used as the input for AF3 in the next step of the pipeline.
 
-[^1]: For human and mouse TCRs, the script will use the TRBC gene located in the same cluster as the J gene (i.e. TRBJ1-1 through TRBJ1-6 will get TRBC1, while TRBJ2-1 through TRBJ2-7 will get TRBC2). This can be overriden (see optional arguments). For all other species you’ll need to explicitly state which constant region you want used.
+[^1]: For human and mouse TCRs, the script will use the TRBC gene located in the same cluster as the J gene (i.e. TRBJ1-1 through TRBJ1-6 will get TRBC1, while TRBJ2-1 through TRBJ2-7 will get TRBC2). This can be overriden (see optional arguments). For all other species you’ll need to explicitly state which constant region you want used. Source: https://jamieheather.github.io/stitchr/usage.html 
 
