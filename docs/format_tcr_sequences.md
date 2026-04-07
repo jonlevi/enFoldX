@@ -24,7 +24,7 @@ my_df[order].to_csv('path/to/stitchr_input.tsv',sep='\t',index=False)
 ```
 
 To run thimble, you can pass in the file with the TCR calls and the appropriate species. For example:
-`thimble -i path/to/stitchr_input.tsv.tsv -o path/to/stitchr_out_human_tcrs.tsv -r ab -s HUMAN`. 
+`thimble -i path/to/stitchr_input.tsv -o path/to/stitchr_out_human_tcrs.tsv -r ab -s HUMAN`. 
 
 The output will include columns containing the full AA sequences of the TCRa and TCRb chains using 1-letter amino acid codes, which can then be used as the input for AF3 in the next step of the pipeline.
 
