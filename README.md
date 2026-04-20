@@ -31,7 +31,7 @@ To run EnFoldX, you need to essentially run 3 main steps:
 1) [Prepare sequence inputs](#prepare-sequence-inputs)
 2) [Run Structure Predictions](#run-alphafold3-predictions)
    - [AF3 Installed Version](#locally-installing-alphafold3)_
-   - [AF3 Server Version] (#server-based-predictions)
+   - [AF3 Server Version](#server-based-predictions)
 4) [Extract features from AlphaFold3 results and predict binding](#extract-features-from-alphafold3-results-and-predict-binding)
 
 Each of these steps is detailed below:
@@ -47,10 +47,10 @@ You will also need the full length sequences for any MHC/HLA chains you want to 
 ## Run AlphaFold3 Predictions
 
 There are currently 2 ways to run AlphaFold3 predictions:
-a) local installation of AF3
-b) AF3 prediction server
+a) [local installation of AF3](#locally-installing-alphafold3)
+b) [AF3 server](#server-based-predictions)
 
-** We highly recommend using local installation of AF3 for EnFoldX, as it allows for the incorporation of multiple seeds at a time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you could theoretically run multiple identical job submissions with different input seeds, and then collect the results yourself, but this is rather hard to scale up.
+**We highly recommend using local installation of AF3 for EnFoldX, as it allows for the incorporation of multiple seeds at a time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you could theoretically run multiple identical job submissions with different input seeds, and then collect the results yourself, but this is rather hard to scale up.
 
 Nevertheless, we break down how to use EnFoldX for either the installed AF3 as for the server AF3:
 
@@ -75,9 +75,9 @@ WEIGHTS_DIR="path/to/weights"
 CONTAINER_PATH="path/to/container"
 ```
 
-#### Local AF3 EnFoldX Predictions
+#### Prediction Pipeline
 
-There are a few sequential steps in the pipeline to go from a TCR-pMHC sequence --> set of features:
+There are a few sequential steps in the pipeline to go from a TCR-pMHC sequence --> predicted structure ensemble:
 1) Format JSONs for running AlphaFold3 MSA for each unique sequence
 2) Run MSA on Input Sequences
 3) Collect MSA results and Format JSONs per TCR-pMHC for running AlphaFold3 Folding
@@ -85,7 +85,7 @@ There are a few sequential steps in the pipeline to go from a TCR-pMHC sequence 
 
 The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. By splitting up the MSA and folding steps, we can re-use TCR MSAs when possible, as often a user will want to fold a TCR with many potential antigens. The folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well if you have access to multiple compute nodes. This section goes through a full example of going from TCR:pMHC sequences --> enFoldX features. All of the data for the examples can be found in `examples/`
 
-##### Step 1: Format JSONs for running AlphaFold3 MSA for each unique sequence
+##### Pipeline Step 1: Format JSONs for running AlphaFold3 MSA for each unique sequence
 ```bash
 usage: prepare_msa_input.py [-h] -s SEQUENCES_FILE [-a ALPHA_COL] [-b BETA_COL] [-m MHC_COL] [-p PEPTIDE_COL] -o OUTPUT_DIR
 options:
@@ -111,13 +111,13 @@ This script will write out one JSON per unique TCRa, TCRb, and MHC sequence in t
 You can see what a successful run looks like by looking at the output for the tutorial in `examples/af3_msa_inputs`
 
 
-##### Step 2: Run MSA on Input Sequences
+##### Pipeline Step 2: Run MSA on Input Sequences
 You will run the AlphaFold3 container on `--no-run-inference` mode once per MSA JSON that was created. It is beneficial to run this in parallel. 
 An example for what this might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found for the tutorial data in `slurm_af3_msa_example.sh`. If you use this submission script, make sure to adjust the partition name, the array size, and the input/output paths to match your preferences/requirements. 
 
 You can see what a successful run looks like by looking at the output for the tutorial above in `examples/af3_msa_outputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser). There will be one JSON per unique chain (except for peptides which don't get MSA), and a metadata chain mapping file to map the MSA output to the original sequences. (You will need this chain_id_map for the next step)
 
-##### Step 3: Collect MSA results and Format JSONs per TCR-pMHC for running AlphaFold3 Folding
+##### Pipeline Step 3: Collect MSA results and Format JSONs per TCR-pMHC for running AlphaFold3 Folding
 ```bash
 usage: prepare_fold_input.py [-h] -s SEQUENCES_FILE [-a ALPHA_COL] [-b BETA_COL] [-m MHC_COL] [-p PEPTIDE_COL] --chain-id-map CHAIN_ID_MAP --MSA-output-dir MSA_OUTPUT_DIR [--af3-seeds AF3_SEEDS]
                              -o OUTPUT_DIR
@@ -148,7 +148,7 @@ You still need the original sequences file from Step 0 and you will also need:
 1) the path that the chain id map was written to in Step 1 and 
 2) the directory that AlphaFold3 wrote the MSA output to. (Note this is the output of step 2, not the output of step 1)
 
-You can choose how many [random seeds](https://github.com/google-deepmind/alphafold3/blob/main/docs/input.md#random-seeds) to use in the AF3 inference. By default, we use 5 seeds per complex. You can add more or remove them by changing the `--af3-seeds` flag. Note that each additional seeds adds about an additional 1-2 minutes at minimum per complex to the runtime, but your predictive accuracy may improve with more seeds. See the our paper for more!
+You can choose how many [random seeds](https://github.com/google-deepmind/alphafold3/blob/main/docs/input.md#random-seeds) to use in the AF3 inference. By default, this pipeline uses 5 seeds per complex. You can add more or remove them by changing the `--af3-seeds` flag. Note that each additional seeds adds about an additional 1-2 minutes at minimum per complex to the runtime, but your predictive accuracy may improve with more seeds. See the our paper for more!
 
 *Example*:
 Following our previous tutorial data:
@@ -157,14 +157,15 @@ python prepare_fold_input.py -s examples/example_input_tcr_pmhcs.csv -o examples
 ```
 You can see what a successful run looks like by looking at the output for the tutorial in `examples/af3_fold_inputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser).
 
-##### Step 4: Run AlphaFold3 Folding on Input Sequences
+##### Pipeline Step 4: Run AlphaFold3 Folding on Input Sequences
 You will run the AlphaFold3 container on `--norun_data_pipeline` mode once per TCR-pMHC input JSON that was created. This requires a GPU to run, see the AlphaFold3 documentation for more detaiils. It is beneficial to run this in parallel. 
 An example for what this might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found for the tutorial data in `slurm_af3_fold_example.sh`. There will be one directory per row in the original sequences CSV file. Each directory will contain 5 X Nseeds subdirectories for each prediction, and will contain the 3D structure .cif file as well as the confidence metadata JSONs. The output will also contain a ranking scores CSV file that ranks the outputs structures, and also a copy of the results for the "best" ranked structure is saved at the top level.
 
 You can see what a successful run looks like by looking at the output for the example above in `examples/af3_fold_outputs`. For more information on the output of AlphaFold3, see [their docs](https://github.com/google-deepmind/alphafold3/blob/main/docs/output.md). 
 
 ### Server Based Predictions
-tbd
+Go to [https://alphafoldserver.com/](https://alphafoldserver.com/) and sign-in with a gmail account and agree to any necessary terms. If you want, you can manually add the sequences using the GUI, but we provide an easier way to generate the input JSONs using a handy python script included in this repo:
+
 
 ## Extract
 
