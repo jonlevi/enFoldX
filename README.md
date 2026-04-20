@@ -39,7 +39,7 @@ Each of these steps is detailed below:
 ## Prepare sequence inputs
 
 ### TCRs
-In order to run this pipeline, you will need a CSV that contains one row for every TCR-pMHC complex you wish to predict. If you already have full length TCR sequences, you can skip this step. For instructions on how to go from `V`, `J`, `CDR3` calls to full length TCR sequences, have a look at our [tutorial](https://github.com/jonlevi/enFoldX/blob/main/docs/format_tcr_sequences.md).
+In order to run this pipeline, you will need a file that contains one row per TCR-pMHC complex that you wish to predict. If you already have full length TCR sequences, you can skip this step. For instructions on how to go from `V`, `J`, `CDR3` calls to full length TCR sequences, have a look at our [tutorial](https://github.com/jonlevi/enFoldX/blob/main/docs/format_tcr_sequences.md). (Note that full length includes leader/constant/framework sequences, not just the variable regions).
 
 ### MHC
 You will also need the full length sequences for any MHC/HLA chains you want to model. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/. For convenience, we include the sequences of a few common HLA alleles in this repo at <>
@@ -50,20 +50,20 @@ There are currently 2 ways to run AlphaFold3 predictions:
 a) local installation of AF3
 b) AF3 prediction server
 
-** We highly recommend using local installation of AF3 for EnFoldX, as it allows for the incorporation of multiple seeds at a time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you could theoretically run multiple identical jobs with different input seeds, and then collect the results yourself.
+** We highly recommend using local installation of AF3 for EnFoldX, as it allows for the incorporation of multiple seeds at a time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you could theoretically run multiple identical job submissions with different input seeds, and then collect the results yourself, but this is rather hard to scale up.
 
 Nevertheless, we break down how to use EnFoldX for either the installed AF3 as for the server AF3:
 
 
 ### Locally Installing AlphaFold3
-If you wish to use enFoldX with AlphaFold3 predictions on your own compute system, you first must install AlphaFold3 following the instructions at https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md. As is outlined in detail there, you will need to request access to the AF3 parameters, and install about 1TB of data along with a docker/singularity container. 
+To run AlphaFold3 predictions on your own compute system, you first must install AlphaFold3 following the instructions at https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md. As is outlined in detail there, you will need to request access to the AF3 parameters, and install about 1TB of data along with a docker/singularity container. 
 
-After the installation you should have the following:
+After the installation you should have the following handy:
 - path to the AF3 parameters
 - path to downloaded databases
 - path to the docker/singularity container for running alphafold
 
-Please keep in mind that you must additional comply with the [TERMS OF USE](https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md) set by Deepmind in order to use AlphaFold3. Please also keep in mind that in order to run AlphaFold3 efficiently, you may need access to specialized hardware (see [https://github.com/google-deepmind/alphafold3/blob/main/docs/performance.md](https://github.com/google-deepmind/alphafold3/blob/main/docs/performance.md)). 
+Please keep in mind that you must additional comply with the [TERMS OF USE](https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md) set by Deepmind in order to use AlphaFold3. Please also keep in mind that in order to run AlphaFold3, you may need access to specialized hardware (see [https://github.com/google-deepmind/alphafold3/blob/main/docs/performance.md](https://github.com/google-deepmind/alphafold3/blob/main/docs/performance.md)). 
 
 
 #### Configure AlphaFold Paths:
@@ -77,13 +77,13 @@ CONTAINER_PATH="path/to/container"
 
 #### Local AF3 EnFoldX Predictions
 
-There are a few sequential steps to take in going from a TCR-pMHC sequence --> set of features:
+There are a few sequential steps in the pipeline to go from a TCR-pMHC sequence --> set of features:
 1) Format JSONs for running AlphaFold3 MSA for each unique sequence
 2) Run MSA on Input Sequences
 3) Collect MSA results and Format JSONs per TCR-pMHC for running AlphaFold3 Folding
 4) Run AlphaFold3 Container on Input JSONs
 
-The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. The Folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well. This section goes through a full example of going from TCR:pMHC sequences --> enFoldX features. All of the data for the examples can be found in `examples/`
+The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. By splitting up the MSA and folding steps, we can re-use TCR MSAs when possible, as often a user will want to fold a TCR with many potential antigens. The folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well if you have access to multiple compute nodes. This section goes through a full example of going from TCR:pMHC sequences --> enFoldX features. All of the data for the examples can be found in `examples/`
 
 ##### Step 1: Format JSONs for running AlphaFold3 MSA for each unique sequence
 ```bash
