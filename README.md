@@ -44,6 +44,16 @@ In order to run this pipeline, you will need a file that contains one row per TC
 ### MHC
 You will also need the full length sequences for any MHC/HLA chains you want to model. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/. For convenience, we include the sequences of a few common HLA alleles in this repo at <>
 
+### Output
+In order to continue with the next steps, you need a CSV that has a alpha, beta, MHC, and peptide sequence per row. It should look something like this:
+
+| TRA_aa | TRB_aa | M_aa | peptide
+| -------- | ------- |
+| MDSSPG... | MGSRL... | MVPCTL... | TVYGFCLL
+| MLILS... | MGAMA... | MVPCTL... | ASNENMETM
+etc.
+
+
 ## Run AlphaFold3 Predictions
 
 There are currently 2 ways to run AlphaFold3 predictions:
