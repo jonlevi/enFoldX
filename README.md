@@ -47,10 +47,10 @@ You will also need the full length sequences for any MHC/HLA chains you want to 
 ### Output
 In order to continue with the next steps, you need a CSV that has a alpha, beta, MHC, and peptide sequence per row. It should look something like this:
 
-| TRA_aa | TRB_aa | M_aa | peptide
-| -------- | ------- |
-| MDSSPG... | MGSRL... | MVPCTL... | TVYGFCLL
-| MLILS... | MGAMA... | MVPCTL... | ASNENMETM
+| TRA_aa | TRB_aa | M_aa | peptide |
+|--------|--------|------|---------|
+| MDSSPG... | MGSRL... | MVPCTL... | TVYGFCLL |
+| MLILS...  | MGAMA... | MVPCTL... | ASNENMETM |
 etc.
 
 
