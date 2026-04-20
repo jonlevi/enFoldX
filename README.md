@@ -30,7 +30,7 @@ The python requirements to run these scripts are minimal so instead of forcing y
 To run EnFoldX, you need to essentially run 3 main steps:
 1) [Prepare sequence inputs](#prepare-sequence-inputs)
 2) [Run Structure Predictions](#run-alphafold3-predictions)
-   - [AF3 Installed Version](#locally-installing-alphafold3)_
+   - [AF3 Installed Version](#locally-installing-alphafold3)
    - [AF3 Server Version](#server-based-predictions)
 4) [Extract features from AlphaFold3 results and predict binding](#extract-features-from-alphafold3-results-and-predict-binding)
 
