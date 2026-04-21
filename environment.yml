@@ -1,0 +1,10 @@
+name: enfoldx_env
+dependencies:
+  - python=3.11
+  - pandas
+  - numpy
+  - tqdm
+  - black
+  - pip
+  - pip:
+    - stitchr

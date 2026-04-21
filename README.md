@@ -21,10 +21,7 @@ cd enFoldX
 Alternatively, you can download the zip file directly using the "download" option on the repository options. Either clone or download should complete in <5 minutes.
 
 ### python reqs
-The python requirements to run these scripts are minimal so instead of forcing you to install a specific list of reqiurements, just make sure you run these scripts in any environment that has:
-- numpy
-- pandas
-- tqdm
+The python requirements to run these scripts are fairly minimal and you can run `conda env create -f environment.yml` to create a `enfoldx_env` virtual environment, and then activate it with `conda activate enfoldx_env`. The environment includes the basic toolkit (numpy, pandas, etc.) as well as a tools that we interact with.
 
 ## Getting Started
 You can run EnFoldX with AF3 locally installed, or AF3 server. 
