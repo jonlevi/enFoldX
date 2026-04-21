@@ -30,7 +30,7 @@ You can see the example output in `examples/af3_server_inputs`.
 You can now use the "Upload JSON" button in the top right of alphafoldserver.com and upload the JSON that was output from the previous script. This will pre-populate one job per row of your input CSV into your draft jobs on the bottom of the screen. You must submit each job individually by clicking on the job row, and then clicking the blue button that says "continue and preview job". Once the jobs complete you can download the outputs and continue with the steps below.
 
 ### Extract features from AlphaFold3 Server Results
-Once the jobs finish, you can select as many jobs as you ran and click the download icon. You should get a large zip file with a name that looks something like "fold_<date>.zip". This zip can be used directly by the script to extract results:
+Once the jobs finish, you can select as many jobs as you ran and click the download icon. You should get a large zip file with a name that looks something like "fold_\<date\>.zip". This zip can be used directly by the script to extract results:
 ```bash
 usage: extract_features_server.py [-h] -s SEQUENCES_FILE [-a ALPHA_COL] [-b BETA_COL] [-m MHC_COL] [-p PEPTIDE_COL] -z ZIP_FILE -o OUTPUT_DIR
 
