@@ -176,7 +176,7 @@ if __name__ == "__main__":
         "--alpha-col",
         type=str,
         required=False,
-        default="A_seq",
+        default="TRA_aa",
         help="Name of column containing TCRa chain sequence in <--sequences-file>",
     )
 
@@ -185,7 +185,7 @@ if __name__ == "__main__":
         "--beta-col",
         type=str,
         required=False,
-        default="B_seq",
+        default="TRB_aa",
         help="Name of column containing TCRb chain sequence in <--sequences-file>",
     )
 
@@ -194,7 +194,7 @@ if __name__ == "__main__":
         "--mhc-col",
         type=str,
         required=False,
-        default="M_seq",
+        default="M_aa",
         help="Name of column containing MHC chain sequence in <--sequences-file>",
     )
 
@@ -203,7 +203,7 @@ if __name__ == "__main__":
         "--peptide-col",
         type=str,
         required=False,
-        default="P_seq",
+        default="peptide",
         help="Name of column containing peptide sequence in <--sequences-file>",
     )
 
@@ -228,7 +228,7 @@ if __name__ == "__main__":
         type=str,
         required=False,
         help="comma-separated string of seeds to input to AF3",
-        default="1,2,5,10",
+        default="1,2,5,10,17",
     )
 
     parser.add_argument(
