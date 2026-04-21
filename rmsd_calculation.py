@@ -3,7 +3,7 @@ import numpy as np
 import os
 import sys
 from Bio.PDB import MMCIFParser, Superimposer
-
+import argparse
 import tqdm
 
 
@@ -131,14 +131,33 @@ def compute_rmsd_between_stuctures(structure1, structure2):
     }
 
 
-def main():
+def main(s1,s2):
 
-    s1 = "path/to/some/model1.cif"
-    s2 = "path/to/some/model2.cif"
+    assert os.path.exists(s1)
+    assert os.path,exists(s2)
 
-    rmsd_values = compute_rmsd_between_stuctures(f1, f2)
+    rmsd_values = compute_rmsd_between_stuctures(s1, s2)
     print(rmsd_values)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
+    parser.add_argument(
+        "-s1",
+        type=str,
+        required=True,
+        help="path to structure 1",
+    )
+
+    parser.add_argument(
+        "-s2",
+        type=str,
+        required=True,
+        help="path to structure 2",
+    )
+    args = parser.parse_args()
+
+    main(args.s1,args.s2)
