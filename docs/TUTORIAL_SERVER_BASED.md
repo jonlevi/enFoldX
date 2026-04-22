@@ -23,7 +23,7 @@ options:
 #### Example
 Following our previous example data:
 ```
-python prepare_server_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/af3_server_inputs
+python ./scripts/prepare_server_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/af3_server_inputs
 ```
 You can see the example output in `examples/af3_server_inputs`.
 
@@ -55,6 +55,6 @@ options:
 #### Example
 Following the example above, I selected 2/4 jobs to download and ran:
 ```
-python extract_features_server.py -o ./examples/enfoldx_extracted_features_server -z ./examples/af3_server_outputs/folds_2026_04_21_20_08.zip -s ./examples/example_input_tcr_pmhcs.csv
+python ./scripts/extract_features_server.py -o ./examples/enfoldx_extracted_features_server -z ./examples/af3_server_outputs/folds_2026_04_21_20_08.zip -s ./examples/example_input_tcr_pmhcs.csv
 ```
 You can see the example download in `examples/af3_server_outputs`, and the example extracted features in `examples/enfoldx_extracted_features_server`

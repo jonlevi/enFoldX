@@ -1,33 +1,31 @@
 #!/bin/bash
 #
-#SBATCH --job-name=af3_msa
+#SBATCH --job-name=af3_fold
 #SBATCH --partition=<partition>
-#SBATCH --time=01:00:00
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem-per-cpu=1G
-#SBATCH --array=1-6
+#SBATCH --gpus-per-task=1
+#SBATCH --mem-per-gpu=10G
+#SBATCH --array=1-4
 
-# ^ set array size to number of input JSONs
+# ^ set array size to number of rows in input sequence CSV
 
 # load config
-source ./af3_config.sh
+source ../af3_config.sh
 
 # set input path to directory of JSONs
-json_dir="examples/af3_msa_inputs"
+json_dir="examples/af3_fold_inputs"
 
 # set output path to desired directory
-OUTDIR="examples/af3_msa_outputs"
+OUTDIR="examples/af3_fold_outputs"
 mkdir -p "$OUTDIR"
 
-# j is the array index for slurm. Grab the jth JSON filename
+# j is the array index for slurm. Grab the jth JSON file
 j=$SLURM_ARRAY_TASK_ID
-filepath=$(ls -1 ${json_dir}/*.json | sed -n "${j}p")
-filename=$(basename "$filepath")
+filename=$(ls -1 "${json_dir}" | sed -n "${j}p")
 
 # invoke docker or singularity depending on how the container is built/installed
 # mount the paths for AF3 (saved in config file) and inputs and outputs
-# running with --norun_inference does MSA only
+# running with --norun_data_pipeline does fold only
 singularity --debug exec --nv \
     --bind "$ALPHAFOLD_DIR:/root/alphafold3" \
     --bind "$DATABASE_DIR:/root/public_databases" \
@@ -40,4 +38,4 @@ singularity --debug exec --nv \
         --model_dir=/root/models \
         --db_dir=/root/public_databases \
         --output_dir=/root/af_output \
-        --norun_inference
+        --norun_data_pipeline

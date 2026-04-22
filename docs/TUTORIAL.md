@@ -6,7 +6,7 @@ After the installation you should have the following handy:
 - path to downloaded databases
 - path to the docker/singularity container for running alphafold
 
-Please keep in mind that you must additional comply with the [TERMS OF USE](https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md) set by Deepmind in order to use AlphaFold3. Please also keep in mind that in order to run AlphaFold3, you may need access to specialized hardware (see [https://github.com/google-deepmind/alphafold3/blob/main/docs/performance.md](https://github.com/google-deepmind/alphafold3/blob/main/docs/performance.md)). 
+Please keep in mind that you must additionally comply with the [TERMS OF USE](https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md) set by Deepmind in order to use AlphaFold3. Please also keep in mind that in order to run AlphaFold3, you may need access to specialized hardware (see [https://github.com/google-deepmind/alphafold3/blob/main/docs/performance.md](https://github.com/google-deepmind/alphafold3/blob/main/docs/performance.md)). 
 
 
 #### Configure AlphaFold Paths:
@@ -48,7 +48,7 @@ options:
                         Directory to place output JSON files (default: None)
 ```
 *Example*:
-```python prepare_msa_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/af3_msa_inputs```
+```python ./scripts/prepare_msa_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/af3_msa_inputs```
 
 This script will write out one JSON per unique TCRa, TCRb, and MHC sequence in the data, as well as a metadata file mapping the sequences to their chain IDs/JSON paths. 
 
@@ -98,12 +98,12 @@ You can choose how many [random seeds](https://github.com/google-deepmind/alphaf
 *Example*:
 Following our previous tutorial data:
 ```
-python prepare_fold_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/af3_fold_inputs --chain-id-map examples/af3_msa_inputs/chain_ids_to_sequences.txt --MSA-output-dir examples/af3_msa_outputs
+python ./scripts/prepare_fold_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/af3_fold_inputs --chain-id-map examples/af3_msa_inputs/chain_ids_to_sequences.txt --MSA-output-dir examples/af3_msa_outputs
 ```
 You can see what a successful run looks like by looking at the output for the tutorial in `examples/af3_fold_inputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser).
 
 ##### Pipeline Step 4: Run AlphaFold3 Folding on Input Sequences
-You will run the AlphaFold3 container on `--norun_data_pipeline` mode once per TCR-pMHC input JSON that was created. This requires a GPU to run, see the AlphaFold3 documentation for more detaiils. It is beneficial to run this in parallel. 
+You will run the AlphaFold3 container on `--norun_data_pipeline` mode once per TCR-pMHC input JSON that was created. This requires a GPU to run, see the AlphaFold3 documentation for more details. It is beneficial to run this in parallel. 
 An example for what this might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found for the tutorial data in `slurm_af3_fold_example.sh`. There will be one directory per row in the original sequences CSV file. Each directory will contain 5 X Nseeds subdirectories for each prediction, and will contain the 3D structure .cif file as well as the confidence metadata JSONs. The output will also contain a ranking scores CSV file that ranks the outputs structures, and also a copy of the results for the "best" ranked structure is saved at the top level.
 
 You can see what a successful run looks like by looking at the output for the example above in `examples/af3_fold_outputs`. For more information on the output of AlphaFold3, see [their docs](https://github.com/google-deepmind/alphafold3/blob/main/docs/output.md). 
@@ -148,6 +148,6 @@ This script will output 4 CSV files in the output directory:
 #### Example
 Following our previous example data:
 ```
-python extract_features.py -s examples/example_input_tcr_pmhcs.csv --af-output-dir examples/af3_fold_outputs -o examples/enfoldx_extracted_features
+python ./scripts/extract_features.py -s examples/example_input_tcr_pmhcs.csv --af-output-dir examples/af3_fold_outputs -o examples/enfoldx_extracted_features
 ```
 You can see the example output in `examples/enfoldx_extracted_features`
