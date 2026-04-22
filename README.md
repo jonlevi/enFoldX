@@ -63,8 +63,8 @@ etc.
 ## Run AlphaFold3 Predictions
 
 There are currently 2 ways to run AlphaFold3 predictions:
-Tutorial a) [local installation of AF3](docs/TUTORIAL.md)
-Tutorial b) [AF3 server](docs/TUTORIAL_SERVER_BASED.md)
+- Tutorial 1) [local installation of AF3](docs/TUTORIAL.md)
+- Tutorial 2) [AF3 server](docs/TUTORIAL_SERVER_BASED.md)
 
 **We highly recommend using local installation of AF3 for EnFoldX, as it allows for the incorporation of multiple seeds at a time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you could theoretically run multiple identical job submissions with different input seeds, and then collect the results yourself, but this is rather hard to scale up.
 
