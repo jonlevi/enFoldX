@@ -3,7 +3,6 @@ import json
 import argparse
 import os
 
-
 AF3_BASE_DICT = {
     "name": "",
     "sequences": [{"protein": {"id": "X", "sequence": ""}}],

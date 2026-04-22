@@ -131,10 +131,10 @@ def compute_rmsd_between_stuctures(structure1, structure2):
     }
 
 
-def main(s1,s2):
+def main(s1, s2):
 
     assert os.path.exists(s1)
-    assert os.path,exists(s2)
+    assert os.path, exists(s2)
 
     rmsd_values = compute_rmsd_between_stuctures(s1, s2)
     print(rmsd_values)
@@ -160,4 +160,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    main(args.s1,args.s2)
+    main(args.s1, args.s2)

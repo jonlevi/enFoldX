@@ -109,7 +109,7 @@ def main(args):
         alpha_chain = chain_base_dict.copy()
         alpha_chain["id"] = "A"
         alpha_chain["sequence"] = row[args.alpha_col]
-        (a_msa, a_templates, a_seq) = get_msa(a_id)
+        a_msa, a_templates, a_seq = get_msa(a_id)
 
         assert a_seq == row[args.alpha_col]
 
@@ -122,7 +122,7 @@ def main(args):
         beta_chain = chain_base_dict.copy()
         beta_chain["id"] = "B"
         beta_chain["sequence"] = row[args.beta_col]
-        (b_msa, b_templates, b_seq) = get_msa(b_id)
+        b_msa, b_templates, b_seq = get_msa(b_id)
 
         assert b_seq == row[args.beta_col]
 
@@ -145,7 +145,7 @@ def main(args):
         mhc_chain = chain_base_dict.copy()
         mhc_chain["id"] = "M"
         mhc_chain["sequence"] = mhc_seq
-        (m_msa, m_templates, m_seq) = get_msa(mhc_id)
+        m_msa, m_templates, m_seq = get_msa(mhc_id)
 
         assert mhc_seq == m_seq
 
