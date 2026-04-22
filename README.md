@@ -25,7 +25,7 @@ The python requirements to run these scripts are fairly minimal and you can run
 conda env create -f environment.yml
 conda activate enfoldx_env
 ```
-to create a `enfoldx_env` virtual environment, and then activate it. The environment includes the basic toolkit (numpy, pandas, etc.) as well as a tools that we interact with.
+to create a `enfoldx_env` virtual environment, and then activate it. The environment includes the basic toolkit (numpy, pandas, etc.) as well as a few tools that we interact with (biopython etc.).
 
 ## Getting Started
 You can run EnFoldX with AF3 locally installed, or AF3 server. 
