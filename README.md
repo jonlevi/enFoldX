@@ -81,6 +81,6 @@ Of course, all of these performance evaluations rely on the availability of labe
 ### RMSD Calculations
 You can also run the rmsd calculation that we use for the specific scenario of comparing two different TCR:pMHC complexes to each other. We use this in the first section of our paper when comparing structural diversity across an ensemble of predictions. Run the script passing in the paths for structure 1 and 2, like this example:
 ```bash
-python rmsd_calculation.py -s1 examples/af3_fold_outputs/index_0/seed-1_sample-0/model.cif -s2 examples/af3_fold_outputs/index_0/seed-1_sample-1/model.cif
+python ./scripts/rmsd_calculation.py -s1 examples/af3_fold_outputs/index_0/seed-1_sample-0/model.cif -s2 examples/af3_fold_outputs/index_0/seed-1_sample-1/model.cif
 ```
 
