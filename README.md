@@ -63,12 +63,12 @@ etc.
 ## Run AlphaFold3 Predictions
 
 There are currently 2 ways to run AlphaFold3 predictions:
-- Tutorial 1) [local installation of AF3](docs/TUTORIAL.md)
-- Tutorial 2) [AF3 server](docs/TUTORIAL_SERVER_BASED.md)
+- [Tutorial for local installation of AF3](docs/TUTORIAL.md)
+- [Tutorial for AF3 server](docs/TUTORIAL_SERVER_BASED.md)
 
 **We highly recommend using local installation of AF3 for EnFoldX, as it allows for the incorporation of multiple seeds at a time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you could theoretically run multiple identical job submissions with different input seeds, and then collect the results yourself, but this is rather hard to scale up.
 
-Nevertheless, in the tutorials linked above, we break down how to use EnFoldX for either choice. After following the steps in those tutorials, you should have a CSV called `ensemble_features.csv` that can be used to predict binding below. 
+Nevertheless, in the tutorials linked above, we break down how to use EnFoldX for either choice. After following the steps in either of those tutorials, you should have a CSV called `ensemble_features.csv` that can be used to predict binding below. Once you have those CSVs, you can continue to the next step here.
 
 ## Predict Binding
 TODO: @olga to add pre-trained models here, as well as any other advice about scaling etc.
