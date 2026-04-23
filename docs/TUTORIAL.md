@@ -1,4 +1,4 @@
-# Tutorial For enFoldX with locally installed AlphaFold3
+# Tutorial for enFoldX with locally installed AlphaFold3
 
 ## Locally Installing AlphaFold3
 To run AlphaFold3 predictions on your own compute system, you first must install AlphaFold3 following the instructions at https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md. As is outlined in detail there, you will need to request access to the AF3 parameters, and install about 1TB of data along with a docker/singularity container. 
