@@ -1,4 +1,6 @@
-### Server Based Predictions
+# Tutorial for enFoldX with AlphaFold3 server predictions
+
+## Server Based Predictions
 Go to [https://alphafoldserver.com/](https://alphafoldserver.com/) and sign-in with a gmail account and agree to any necessary terms. If you want, you can manually add the sequences using the GUI, but we provide an easier way to generate multiple jobs using a single input JSON, using a handy python script included in this repo. Please note, you must process your data in batches of 100 or fewer rows at a time, since the server only accepts JSONs with 100 jobs max at a time. Also note that although you upload a JSON with many jobs, the current quota for AF3 server will only allow ~20 jobs per person per day.
 To generate the JSON that can be uploaded to the AF3 server, you can run the handy script:
 ```bash
@@ -20,7 +22,7 @@ options:
   -o OUTPUT_DIR, --output-dir OUTPUT_DIR
                         Directory to place output JSON files (default: None)
 ```
-#### Example
+### Example
 Following our previous example data:
 ```
 python ./scripts/prepare_server_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/af3_server_inputs
