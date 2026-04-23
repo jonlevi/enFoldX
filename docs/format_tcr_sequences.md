@@ -1,7 +1,8 @@
-### Format Full Length TCR sequences
+# Using stitchr to get full length TCR sequences for enFoldX input
 
-If you already have full length TCR sequences, you can skip this tutorial. 
+If you already have full length TCR sequences, you can skip this tutorial.
 
+## Format Full Length TCR sequences
 In order to run the EnFoldX pipeline, you will need a CSV that contains one row for every TCR-pMHC complex you wish to predict. However, usually, you will only have `V`,`J`, and `CDR3` calls from sequencing or from publicly available TCR data.
 
 We prefer to use the full length TCR sequences that come from the output of the useful tool [stitchr](https://jamieheather.github.io/stitchr/index.html), which reconstructs full-length TCR sequences from minimal input data. We will be using the command-line utility `thimble`, a wrapper included with `stitchr`, for batch processing of TCR alpha and beta chains. Before you begin, ensure you have installed `stitchr` and the necessary data (for the genome of interest) by following the instructions [here] (https://jamieheather.github.io/stitchr/installation.html#installation).
@@ -11,6 +12,7 @@ To start, you should have a CSV that has paired chain TCR information for each T
 
 You can leave the other input columns blank, although you are welcome to include additional data if you have it. If you do have TRAC/TRBC calls, then you should use those instead of leaving that columns blank. Otherwise, stitchr will try to to infer the best one to use.[^1]
 
+#### Example: Format your data into stitchr compatible format
 Here is some example code to put your dataframe in the appropriate format, starting from some pandas dataframe with the apporpriate data:
 ```
 for c in ['TRAC','TRBC','TRA_leader','TRB_leader','Linker',
