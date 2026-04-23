@@ -30,13 +30,13 @@ conda activate enfoldx_env
 to create a `enfoldx_env` virtual environment, and then activate it. The environment includes the basic toolkit (numpy, pandas, etc.) as well as a few tools that we interact with (biopython etc.).
 
 ## Getting Started
-You can run EnFoldX with AF3 locally installed, or by using the [AF3 server](https://alphafoldserver.com/). We include more detailed instructions for both of these options [below](#run-alphafold3-predictions).
+You can run enFoldX with AF3 locally installed, or by using the [AF3 server](https://alphafoldserver.com/). We include more detailed instructions for both of these options [below](#run-alphafold3-predictions).
 
-**We highly recommend using local installation of AF3 for EnFoldX, as it allows for the incorporation of multiple seeds at a time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you could theoretically run multiple identical job submissions with different input seeds, and then collect the results yourself, but this is rather hard to scale up. You also cannot separate MSA from folding on the server, which also limits your ability to reuse MSAs, which can be helpful if you are folding the same TCR against multple potential peptides.
+**We highly recommend using local installation of AF3 for enFoldX, as it allows for the incorporation of multiple seeds at a time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you could theoretically run multiple identical job submissions with different input seeds, and then collect the results yourself, but this is rather hard to scale up. You also cannot separate MSA from folding on the server, which also limits your ability to reuse MSAs, which can be helpful if you are folding the same TCR against multple potential peptides.
 
-Nevertheless, we provide step-by-step tutorials for how to use EnFoldX for either the installed AF3 as for the server AF3:
+Nevertheless, we provide step-by-step tutorials for how to use enFoldX for either the installed AF3 as for the server AF3:
 
-To run EnFoldX, you need to essentially run 3 main steps:
+To run enFoldX, you need to essentially run 3 main steps:
 1) [Prepare sequence inputs](#prepare-sequence-inputs)
 2) [Run Structure Predictions and Extract Features](#run-alphafold3-predictions)
 3) [Predict binding](#predict-binding)
@@ -60,7 +60,7 @@ In order to continue with the next steps, you need a CSV that has a alpha, beta,
 | MLILS...  | MGAMA... | MVPCTL... | ASNENMETM |
 etc.
 
-(Note: the column names above are the default names for all of the scripts in the EnFoldX code, but you can override with custom column names by passing in the apporpirate flags to each script with `[-a ALPHA_COL] [-b BETA_COL] [-m MHC_COL] [-p PEPTIDE_COL] `)
+(Note: the column names above are the default names for all of the scripts in the enFoldX code, but you can override with custom column names by passing in the apporpirate flags to each script with `[-a ALPHA_COL] [-b BETA_COL] [-m MHC_COL] [-p PEPTIDE_COL] `)
 
 ## Run AlphaFold3 Predictions
 
@@ -68,9 +68,9 @@ There are currently 2 ways to run AlphaFold3 predictions:
 - [Tutorial for local installation of AF3](docs/TUTORIAL.md)
 - [Tutorial for AF3 server](docs/TUTORIAL_SERVER_BASED.md)
 
-**We highly recommend using local installation of AF3 for EnFoldX, as it allows for the incorporation of multiple seeds at a time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you could theoretically run multiple identical job submissions with different input seeds, and then collect the results yourself, but this is rather hard to scale up.
+**We highly recommend using local installation of AF3 for enFoldX, as it allows for the incorporation of multiple seeds at a time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you could theoretically run multiple identical job submissions with different input seeds, and then collect the results yourself, but this is rather hard to scale up.
 
-Nevertheless, in the tutorials linked above, we break down how to use EnFoldX for either choice. After following the steps in either of those tutorials, you should have a CSV called `ensemble_features.csv` that can be used to predict binding below. Once you have those CSVs, you can continue to the next step here.
+Nevertheless, in the tutorials linked above, we break down how to use enFoldX for either choice. After following the steps in either of those tutorials, you should have a CSV called `ensemble_features.csv` that can be used to predict binding below. Once you have those CSVs, you can continue to the next step here.
 
 ## Predict Binding
 TODO: @olga to add pre-trained models here, as well as any other advice about scaling etc.
