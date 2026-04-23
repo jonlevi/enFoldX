@@ -30,7 +30,7 @@ conda activate enfoldx_env
 to create a `enfoldx_env` virtual environment, and then activate it. The environment includes the basic toolkit (numpy, pandas, etc.) as well as a few tools that we interact with (biopython etc.).
 
 ## Getting Started
-You can run EnFoldX with AF3 locally installed, or by using the [AF3 server]. We include more detailed instructions for both of these options [below](#run-alphafold3-predictions).
+You can run EnFoldX with AF3 locally installed, or by using the [AF3 server](https://alphafoldserver.com/). We include more detailed instructions for both of these options [below](#run-alphafold3-predictions).
 
 **We highly recommend using local installation of AF3 for EnFoldX, as it allows for the incorporation of multiple seeds at a time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you could theoretically run multiple identical job submissions with different input seeds, and then collect the results yourself, but this is rather hard to scale up. You also cannot separate MSA from folding on the server, which also limits your ability to reuse MSAs, which can be helpful if you are folding the same TCR against multple potential peptides.
 
