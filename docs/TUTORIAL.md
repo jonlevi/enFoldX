@@ -62,7 +62,9 @@ You will run the AlphaFold3 container on `--no-run-inference` mode once per MSA 
 
 An example for what a submission script might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found for the tutorial data in `slurm_af3_msa_example.sh`. If you use this submission script, make sure to adjust the partition name, the array size, the compute requests, and the input/output paths to match your preferences/requirements. Note, the array size will be larger than the size of your input CSV, since you should be running one job per unique TCRa, TCRb, and MHC. You can check what the array size for slurm should be by looking at the the number of input jsons created in Step 1 (e.g. `ls examples/af3_msa_inputs/*.json | wc -l`)
 
-You can see what a successful MSA run looks like by looking at the output for the tutorial above in `examples/af3_msa_outputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser). There will be one JSON per unique chain (except for peptides which don't get MSA), and a metadata chain mapping file to map the MSA output to the original sequences. (You will need this chain_id_map for the next step)
+You can see what a successful MSA run looks like by looking at the output for the tutorial above in `examples/af3_msa_outputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser). There will be one JSON per unique chain (except for peptides which don't get MSA), and a metadata chain mapping file to map the MSA output to the original sequences. (You will need this chain_id_map for the next step). 
+
+Troubleshooting tip: One common error we have seen is that if your TCR sequences have a "*" character in them, which is sometimes used for a stop codon, then AlphaFold will fail. Make sure to remove those TCRs, as AlphaFold cannot model them.
 
 #### Pipeline Step 3: Collect MSA results and Format JSONs per TCR-pMHC for running AlphaFold3 Folding
 ```bash
@@ -103,7 +105,7 @@ Following our previous tutorial data:
 ```
 python ./scripts/prepare_fold_input.py -s examples/example_input_tcr_pmhcs.csv -o examples/af3_fold_inputs --chain-id-map examples/af3_msa_inputs/chain_ids_to_sequences.txt --MSA-output-dir examples/af3_msa_outputs
 ```
-You can see what a successful run looks like by looking at the output for the tutorial in `examples/af3_fold_inputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser).
+You can see what a successful run looks like by looking at the output for the tutorial in `examples/af3_fold_inputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser). 
 
 #### Pipeline Step 4: Run AlphaFold3 Folding on Input Sequences
 You will run the AlphaFold3 container on `--norun_data_pipeline` mode once per TCR-pMHC input JSON that was created. This requires a GPU to run, see the AlphaFold3 documentation for more details. It is beneficial to run this in parallel. 
