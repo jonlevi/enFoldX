@@ -24,9 +24,9 @@ CONTAINER_PATH="path/to/container"
 
 There are a few sequential steps in the pipeline to go from a TCR-pMHC sequence --> predicted structure ensemble:
 1) Format JSONs for running AlphaFold3 MSA for each unique sequence
-2) Run MSA on Input Sequences
+2) Run MSA on Input Sequences (CPU)
 3) Collect MSA results and Format JSONs per TCR-pMHC for running AlphaFold3 Folding
-4) Run AlphaFold3 Container on Input JSONs
+4) Run AlphaFold3 Container on Input JSONs (GPU)
 
 The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. By splitting up the MSA and folding steps, we can re-use TCR MSAs when possible, as often a user will want to fold a TCR with many potential antigens. The folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well if you have access to multiple compute nodes. This section goes through a full example of going from TCR:pMHC sequences --> enFoldX features. All of the data for the examples can be found in `examples/`
 
@@ -58,8 +58,9 @@ You can see what a successful run looks like by looking at the output for the tu
 
 
 #### Pipeline Step 2: Run MSA on Input Sequences
-You will run the AlphaFold3 container on `--no-run-inference` mode once per MSA JSON that was created. It is beneficial to run this in parallel. 
-An example for what this might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found for the tutorial data in `slurm_af3_msa_example.sh`. If you use this submission script, make sure to adjust the partition name, the array size, and the input/output paths to match your preferences/requirements. 
+You will run the AlphaFold3 container on `--no-run-inference` mode once per MSA JSON that was created. It is beneficial to run this in parallel across your dataset. Note that each job runs on a CPU node, however you can allocate multiple threads for AF3 to speed up jackhmmer. For example, in slurm, to add 8 threads you could use `#SBATCH --cpus-per-task=8`.
+
+An example for what a submission script might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found for the tutorial data in `slurm_af3_msa_example.sh`. If you use this submission script, make sure to adjust the partition name, the array size, the compute requests, and the input/output paths to match your preferences/requirements. 
 
 You can see what a successful run looks like by looking at the output for the tutorial above in `examples/af3_msa_outputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser). There will be one JSON per unique chain (except for peptides which don't get MSA), and a metadata chain mapping file to map the MSA output to the original sequences. (You will need this chain_id_map for the next step)
 
