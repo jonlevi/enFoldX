@@ -3,7 +3,9 @@
 
 enFoldX (**En**semble of **Fold**ed Comple**X**es) enables the binding prediction of large datasets of input sequences by extracting distributions of high dimensional confidence features from ensembles of predicted structures.
 
-This repo provides code for a pipeline to run enFoldX. This implementation of enFoldX uses AlphaFold3 and runs predictions for complex binding for TCR-peptide-MHC complexes (for class I MHC). If you are looking for more details about the analysis in our paper, please refer to the [other repository for the paper results](https://github.com/jonlevi/enfoldx_paper) instead.
+This repo provides code for a pipeline to run enFoldX. This implementation of enFoldX uses AlphaFold3 and runs predictions for complex binding for TCR-peptide-MHC complexes (for class I MHC). If you are looking for more details about the analysis in our paper, please refer to the manuscript directory.
+
+If you are looking for the labeled TCR datasets used in our paper, please access the CSV located [here](https://github.com/jonlevi/enFoldX/blob/main/manuscript/data/datasets.csv).
 
 ## enFoldX
 

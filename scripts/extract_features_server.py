@@ -19,10 +19,26 @@ def unzip_file(zip_path):
     return output_dir
 
 
-def parse_af3_results(summary_json_path, confidences_json_path):
+def find_cdr_index(full_chain_seq, cdr3_seq):
+    assert (
+        cdr3_seq in full_chain_seq
+    ), f"CDR3 Sequence: {cdr3_seq} must be in full chain sequence"
+
+    return full_chain_seq.find(cdr3_seq)
+
+
+def parse_af3_results(
+    summary_json_path,
+    confidences_json_path,
+    a_cdr3_start,
+    a_cdr3_end,
+    b_cdr3_start,
+    b_cdr3_end,
+):
 
     chains = ["A", "B", "C", "D"]
     chain_mapper = {"A": "A", "B": "B", "C": "P", "D": "M"}
+    chain_mapper_reverse = {"A": "A", "B": "B", "P": "C", "M": "D"}
 
     results = {}
     with open(summary_json_path, "r") as jfile1:
@@ -106,6 +122,77 @@ def parse_af3_results(summary_json_path, confidences_json_path):
                     )
                     results[f"min_plddt_{chain_mapper.get(chain1)}"] = np.min(sub_plddt)
                     results[f"max_plddt_{chain_mapper.get(chain1)}"] = np.max(sub_plddt)
+        # CDR3 Metrics
+        residues_alpha = [
+            int(idx) for idx in np.where(residue_chain_ids == chain_mapper.get("A"))[0]
+        ]
+        residues_beta = [
+            int(idx) for idx in np.where(residue_chain_ids == chain_mapper.get("B"))[0]
+        ]
+        residues_alpha_cdr3 = residues_alpha[a_cdr3_start:a_cdr3_end]
+        residues_beta_cdr3 = residues_beta[b_cdr3_start:b_cdr3_end]
+        for k, chain3 in enumerate(["M", "P"]):
+
+            _chain3 = chain_mapper_reverse.get(
+                chain3
+            )  # use AF3 mapping ABCD and not ABMP
+            residues_3 = [int(idx) for idx in np.where(residue_chain_ids == _chain3)[0]]
+
+            sub_pae_a_chain = pae[
+                residues_alpha_cdr3[0] : residues_alpha_cdr3[-1] + 1,
+                residues_3[0] : residues_3[-1] + 1,
+            ]
+            sub_pae_chain_a = pae[
+                residues_3[0] : residues_3[-1] + 1,
+                residues_alpha_cdr3[0] : residues_alpha_cdr3[-1] + 1,
+            ]
+            pae_submatrix_a = np.concatenate(
+                (sub_pae_a_chain, sub_pae_chain_a), axis=None
+            )
+
+            results[f"avg_pae_interaction_cdr3a_{chain3}"] = np.mean(pae_submatrix_a)
+            results[f"min_pae_interaction_cdr3a_{chain3}"] = np.min(pae_submatrix_a)
+            results[f"max_pae_interaction_cdr3a_{chain3}"] = np.max(pae_submatrix_a)
+            results[f"std_pae_interaction_cdr3a_{chain3}"] = np.std(pae_submatrix_a)
+
+            sub_pae_b_chain = pae[
+                residues_beta_cdr3[0] : residues_beta_cdr3[-1] + 1,
+                residues_3[0] : residues_3[-1] + 1,
+            ]
+            sub_pae_chain_b = pae[
+                residues_3[0] : residues_3[-1] + 1,
+                residues_beta_cdr3[0] : residues_beta_cdr3[-1] + 1,
+            ]
+            pae_submatrix_b = np.concatenate(
+                (sub_pae_b_chain, sub_pae_chain_b), axis=None
+            )
+            results[f"avg_pae_interaction_cdr3b_{chain3}"] = np.mean(pae_submatrix_b)
+            results[f"min_pae_interaction_cdr3b_{chain3}"] = np.min(pae_submatrix_b)
+            results[f"max_pae_interaction_cdr3b_{chain3}"] = np.max(pae_submatrix_b)
+            results[f"std_pae_interaction_cdr3b_{chain3}"] = np.std(pae_submatrix_b)
+
+            sub_contact_probs_a_chain = contact_probs[
+                residues_alpha_cdr3[0] : residues_alpha_cdr3[-1] + 1,
+                residues_3[0] : residues_3[-1] + 1,
+            ]
+            results[f"avg_contact_probs_cdr3a_{chain3}"] = np.mean(
+                sub_contact_probs_a_chain
+            )
+            results[f"max_contact_probs_cdr3a_{chain3}"] = np.max(
+                sub_contact_probs_a_chain
+            )
+
+            sub_contact_probs_b_chain = contact_probs[
+                residues_beta_cdr3[0] : residues_beta_cdr3[-1] + 1,
+                residues_3[0] : residues_3[-1] + 1,
+            ]
+            results[f"avg_contact_probs_cdr3b_{chain3}"] = np.mean(
+                sub_contact_probs_b_chain
+            )
+            results[f"max_contact_probs_cdr3b_{chain3}"] = np.max(
+                sub_contact_probs_b_chain
+            )
+    return results
     return results
 
 
@@ -123,19 +210,17 @@ def main(args):
         ("beta", args.beta_col),
         ("mhc", args.mhc_col),
         ("peptide", args.peptide_col),
+        ("cdr3a", args.cdr3alpha_col),
+        ("cdr3b", args.cdr3beta_col),
     ]:
         assert (
             col in seq_df.columns
-        ), f"Missing {name} sequence column which was to {col}. Please check it is set properly and try again."
+        ), f"Missing {name} sequence column which was said to be set at {col}. Please add this column or change the column key using the appropriate flag."
         assert (
             seq_df[col].notna().all() and (seq_df[col] != "").all()
         ), f"{col} contains missing values"
 
     assert os.path.exists(args.zip_file), f"{rgs.zip_file} not found"
-
-    if not os.path.exists(args.output_dir):
-        print(f"{args.output_dir} does not exist... Creating new directory")
-        os.makedirs(args.output_dir)
 
     samples = [
         0,
@@ -152,14 +237,9 @@ def main(args):
         if not os.path.isdir(os.path.join(af3_dir, subdir)):
             continue
 
-        new_row = {}
-
         input_json = os.path.join(af3_dir, subdir, f"fold_{subdir}_job_request.json")
         with open(input_json, "r") as ij:
             input_data = json.load(ij)[0]
-
-        new_row["name"] = input_data["name"]
-        new_row["af3_seed"] = int(input_data["modelSeeds"][0])
 
         chain_seqs = {}
 
@@ -177,9 +257,26 @@ def main(args):
             original_df_row.shape[0] == 1
         ), f"Seq df must have exactly one row per input TCR-pMHC, but we found  {original_df_row.shape[0]} for {subdir}"
 
+        original_index = original_df_row.index.values[0]
+
+        TRA = original_df_row[args.alpha_col].values[0]
+        cdr3a = original_df_row[args.cdr3alpha_col].values[0]
+        TRB = original_df_row[args.beta_col].values[0]
+        cdr3b = original_df_row[args.cdr3beta_col].values[0]
+
+        a_cdr3_start = find_cdr_index(TRA, cdr3a)
+        a_cdr3_end = a_cdr3_start + len(cdr3a)
+
+        b_cdr3_start = find_cdr_index(TRB, cdr3b)
+        b_cdr3_end = b_cdr3_start + len(cdr3b)
+
         for sample in samples:
 
-            new_row["original_index"] = original_df_row.index.values[0]
+            new_row = {}
+            new_row["name"] = input_data["name"]
+            new_row["af3_seed"] = int(input_data["modelSeeds"][0])
+
+            new_row["original_index"] = original_index
             new_row["af3_sample"] = sample
             summary_path = os.path.join(
                 af3_dir, subdir, f"fold_{subdir}_summary_confidences_{sample}.json"
@@ -188,10 +285,22 @@ def main(args):
                 af3_dir, subdir, f"fold_{subdir}_full_data_{sample}.json"
             )
 
-            sub_results = parse_af3_results(summary_path, confidences_path)
+            sub_results = parse_af3_results(
+                summary_path,
+                confidences_path,
+                a_cdr3_start,
+                a_cdr3_end,
+                b_cdr3_start,
+                b_cdr3_end,
+            )
             new_row.update(sub_results)
             rows.append(new_row)
 
+    if not os.path.exists(args.output_dir):
+        print(f"{args.output_dir} does not exist... Creating new directory")
+        os.makedirs(args.output_dir)
+
+    print(f"Writing results to {args.output_dir}...")
     all_results_df = pd.DataFrame(rows)
     avg_results_df = (
         all_results_df.groupby(by=["original_index", "name"], dropna=False)
@@ -242,6 +351,22 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "-z",
+        "--zip-file",
+        type=str,
+        required=True,
+        help="Zip with AlphaFold3 Server Outputs. This directory should contain one subdirectory per job downloaded",
+    )
+
+    parser.add_argument(
+        "-o",
+        "--output-dir",
+        type=str,
+        required=True,
+        help="Directory to place output CSV files with features",
+    )
+
+    parser.add_argument(
         "-a",
         "--alpha-col",
         type=str,
@@ -278,19 +403,21 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-z",
-        "--zip-file",
+        "-cdr3a",
+        "--cdr3alpha-col",
         type=str,
-        required=True,
-        help="Zip with AlphaFold3 Server Outputs. This directory should contain one subdirectory per job downloaded",
+        required=False,
+        default="TRA_CDR3",
+        help="Name of column containing CDR3a chain sequence in <--sequences-file>",
     )
 
     parser.add_argument(
-        "-o",
-        "--output-dir",
+        "-cdr3b",
+        "--cdr3beta-col",
         type=str,
-        required=True,
-        help="Directory to place output CSV files with features",
+        required=False,
+        default="TRB_CDR3",
+        help="Name of column containing CDR3b chain sequence in <--sequences-file>",
     )
 
     args = parser.parse_args()

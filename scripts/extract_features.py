@@ -6,7 +6,22 @@ import argparse
 import numpy as np
 
 
-def parse_af3_results(summary_json_path, confidences_json_path):
+def find_cdr_index(full_chain_seq, cdr3_seq):
+    assert (
+        cdr3_seq in full_chain_seq
+    ), f"CDR3 Sequence: {cdr3_seq} must be in full chain sequence"
+
+    return full_chain_seq.find(cdr3_seq)
+
+
+def parse_af3_results(
+    summary_json_path,
+    confidences_json_path,
+    a_cdr3_start,
+    a_cdr3_end,
+    b_cdr3_start,
+    b_cdr3_end,
+):
 
     chains = ["A", "B", "M", "P"]
 
@@ -89,6 +104,70 @@ def parse_af3_results(summary_json_path, confidences_json_path):
                     results[f"avg_plddt_{chain1}"] = np.mean(sub_plddt)
                     results[f"min_plddt_{chain1}"] = np.min(sub_plddt)
                     results[f"max_plddt_{chain1}"] = np.max(sub_plddt)
+
+        # CDR3 Metrics
+        residues_alpha = [int(idx) for idx in np.where(residue_chain_ids == "A")[0]]
+        residues_beta = [int(idx) for idx in np.where(residue_chain_ids == "B")[0]]
+        residues_alpha_cdr3 = residues_alpha[a_cdr3_start:a_cdr3_end]
+        residues_beta_cdr3 = residues_beta[b_cdr3_start:b_cdr3_end]
+        for k, chain3 in enumerate(["M", "P"]):
+
+            residues_3 = [int(idx) for idx in np.where(residue_chain_ids == chain3)[0]]
+
+            sub_pae_a_chain = pae[
+                residues_alpha_cdr3[0] : residues_alpha_cdr3[-1] + 1,
+                residues_3[0] : residues_3[-1] + 1,
+            ]
+            sub_pae_chain_a = pae[
+                residues_3[0] : residues_3[-1] + 1,
+                residues_alpha_cdr3[0] : residues_alpha_cdr3[-1] + 1,
+            ]
+            pae_submatrix_a = np.concatenate(
+                (sub_pae_a_chain, sub_pae_chain_a), axis=None
+            )
+
+            results[f"avg_pae_interaction_cdr3a_{chain3}"] = np.mean(pae_submatrix_a)
+            results[f"min_pae_interaction_cdr3a_{chain3}"] = np.min(pae_submatrix_a)
+            results[f"max_pae_interaction_cdr3a_{chain3}"] = np.max(pae_submatrix_a)
+            results[f"std_pae_interaction_cdr3a_{chain3}"] = np.std(pae_submatrix_a)
+
+            sub_pae_b_chain = pae[
+                residues_beta_cdr3[0] : residues_beta_cdr3[-1] + 1,
+                residues_3[0] : residues_3[-1] + 1,
+            ]
+            sub_pae_chain_b = pae[
+                residues_3[0] : residues_3[-1] + 1,
+                residues_beta_cdr3[0] : residues_beta_cdr3[-1] + 1,
+            ]
+            pae_submatrix_b = np.concatenate(
+                (sub_pae_b_chain, sub_pae_chain_b), axis=None
+            )
+            results[f"avg_pae_interaction_cdr3b_{chain3}"] = np.mean(pae_submatrix_b)
+            results[f"min_pae_interaction_cdr3b_{chain3}"] = np.min(pae_submatrix_b)
+            results[f"max_pae_interaction_cdr3b_{chain3}"] = np.max(pae_submatrix_b)
+            results[f"std_pae_interaction_cdr3b_{chain3}"] = np.std(pae_submatrix_b)
+
+            sub_contact_probs_a_chain = contact_probs[
+                residues_alpha_cdr3[0] : residues_alpha_cdr3[-1] + 1,
+                residues_3[0] : residues_3[-1] + 1,
+            ]
+            results[f"avg_contact_probs_cdr3a_{chain3}"] = np.mean(
+                sub_contact_probs_a_chain
+            )
+            results[f"max_contact_probs_cdr3a_{chain3}"] = np.max(
+                sub_contact_probs_a_chain
+            )
+
+            sub_contact_probs_b_chain = contact_probs[
+                residues_beta_cdr3[0] : residues_beta_cdr3[-1] + 1,
+                residues_3[0] : residues_3[-1] + 1,
+            ]
+            results[f"avg_contact_probs_cdr3b_{chain3}"] = np.mean(
+                sub_contact_probs_b_chain
+            )
+            results[f"max_contact_probs_cdr3b_{chain3}"] = np.max(
+                sub_contact_probs_b_chain
+            )
     return results
 
 
@@ -106,19 +185,17 @@ def main(args):
         ("beta", args.beta_col),
         ("mhc", args.mhc_col),
         ("peptide", args.peptide_col),
+        ("cdr3a", args.cdr3alpha_col),
+        ("cdr3b", args.cdr3beta_col),
     ]:
         assert (
             col in seq_df.columns
-        ), f"Missing {name} sequence column which was to {col}. Please check it is set properly and try again."
+        ), f"Missing {name} sequence column which was said to be set at {col}. Please add this column or change the column key using the appropriate flag."
         assert (
             seq_df[col].notna().all() and (seq_df[col] != "").all()
         ), f"{col} contains missing values"
 
     assert os.path.exists(args.af_output_dir), f"{args.af_output_dir} not found"
-
-    if not os.path.exists(args.output_dir):
-        print(f"{args.output_dir} does not exist... Creating new directory")
-        os.makedirs(args.output_dir)
 
     try:
         model_seeds = [int(s) for s in args.af3_seeds.split(",")]
@@ -134,7 +211,7 @@ def main(args):
         2,
         3,
         4,
-    ]  # maybe this is configurable in AF3? see https://github.com/google-deepmind/alphafold3/issues/109
+    ]
 
     # Write the files
     rows = []
@@ -144,6 +221,18 @@ def main(args):
 
         ranking = f"{path}/ranking_scores.csv"
         ranking_df = pd.read_csv(ranking, header=0)
+
+        TRA = row[args.alpha_col]
+        cdr3a = row[args.cdr3alpha_col]
+        TRB = row[args.beta_col]
+        cdr3b = row[args.cdr3beta_col]
+
+        a_cdr3_start = find_cdr_index(TRA, cdr3a)
+        a_cdr3_end = a_cdr3_start + len(cdr3a)
+
+        b_cdr3_start = find_cdr_index(TRB, cdr3b)
+        b_cdr3_end = b_cdr3_start + len(cdr3b)
+
         for seed in model_seeds:
             for sample in samples:
                 row = {}
@@ -156,7 +245,14 @@ def main(args):
                 confidences_path = (
                     f"{path}/seed-{seed}_sample-{sample}/confidences.json"
                 )
-                sub_results = parse_af3_results(summary_path, confidences_path)
+                sub_results = parse_af3_results(
+                    summary_path,
+                    confidences_path,
+                    a_cdr3_start,
+                    a_cdr3_end,
+                    b_cdr3_start,
+                    b_cdr3_end,
+                )
                 row.update(sub_results)
                 ranking = ranking_df[
                     (ranking_df["seed"] == seed) & (ranking_df["sample"] == sample)
@@ -164,6 +260,11 @@ def main(args):
                 row["af3_ranking"] = ranking
                 rows.append(row)
 
+    if not os.path.exists(args.output_dir):
+        print(f"{args.output_dir} does not exist... Creating new directory")
+        os.makedirs(args.output_dir)
+
+    print(f"Writing results to {args.output_dir}...")
     all_results_df = pd.DataFrame(rows)
     avg_results_df = (
         all_results_df.groupby(by=["original_index"], dropna=False)
@@ -212,6 +313,28 @@ if __name__ == "__main__":
         required=True,
         help="Path to input file with TCR-pMHC sequences",
     )
+    parser.add_argument(
+        "--af-output-dir",
+        type=str,
+        required=True,
+        help="Directory with AlphaFold3 outputs. This directory should contain one subdirectory per row in the sequences-file",
+    )
+
+    parser.add_argument(
+        "--af3-seeds",
+        type=str,
+        required=False,
+        help="comma-separated string of seeds that were input to AF3",
+        default="1,2,5,10",
+    )
+
+    parser.add_argument(
+        "-o",
+        "--output-dir",
+        type=str,
+        required=True,
+        help="Directory to place output CSV files with features",
+    )
 
     parser.add_argument(
         "-a",
@@ -232,6 +355,24 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "-cdr3a",
+        "--cdr3alpha-col",
+        type=str,
+        required=False,
+        default="TRA_CDR3",
+        help="Name of column containing CDR3a chain sequence in <--sequences-file>",
+    )
+
+    parser.add_argument(
+        "-cdr3b",
+        "--cdr3beta-col",
+        type=str,
+        required=False,
+        default="TRB_CDR3",
+        help="Name of column containing CDR3b chain sequence in <--sequences-file>",
+    )
+
+    parser.add_argument(
         "-m",
         "--mhc-col",
         type=str,
@@ -247,29 +388,6 @@ if __name__ == "__main__":
         required=False,
         default="peptide",
         help="Name of column containing peptide sequence in <--sequences-file>",
-    )
-
-    parser.add_argument(
-        "--af-output-dir",
-        type=str,
-        required=True,
-        help="Directory with AlphaFold3 outputs. This directory should contain one subdirectory per row in the sequences-file",
-    )
-
-    parser.add_argument(
-        "--af3-seeds",
-        type=str,
-        required=False,
-        help="comma-separated string of seeds that were input to AF3",
-        default="1,2,5,10,17",
-    )
-
-    parser.add_argument(
-        "-o",
-        "--output-dir",
-        type=str,
-        required=True,
-        help="Directory to place output CSV files with features",
     )
 
     args = parser.parse_args()
