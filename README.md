@@ -58,10 +58,11 @@ You will also need the full length sequences for any MHC/HLA chains you want to 
 ### Output
 In order to continue with the next steps, you need a CSV that has columns containig the full-length amino acids sequences for the TCRa, TCRb, MHC, and peptide sequence per row. It also must contain the sequences of the CDR3a and the CDR3b, which must be substrings of the TCRa and TCRb respectively. Your CSV should look something like this:
 
-| TRA_aa | TRA_CDR3 | TRB_aa | TRB_CDR3| M_aa | peptide |
-|--------|--------|------|---------|
-| MDSSPG... | CALGDPPNTGKLTF| MGSRL... | CASTSGVGQDTQYF | MVPCTL... | TVYGFCLL |
-| MLILS...  | CAMRSSGGSNAKLTF| MGAMA... | CASSGGANTGQLYF | MVPCTL... | ASNENMETM |
+| TRA_aa   | TRA_CDR3         | TRB_aa   | TRB_CDR3         | M_aa     | peptide   |
+|----------|------------------|----------|------------------|----------|-----------|
+| MDSSPG... | CALGDPPNTGKLTF  | MGSRL... | CASTSGVGQDTQYF   | MVPCTL... | TVYGFCLL |
+| MLILS...  | CAMRSSGGSNAKLTF | MGAMA... | CASSGGANTGQLYF   | MVPCTL... | ASNENMETM |
+
 etc.
 
 (Note: the column names above are the default names for all of the scripts in the enFoldX code, but you can override with custom column names by passing in the apporpirate flags to each script with
