@@ -1,7 +1,9 @@
 # Tutorial for enFoldX with AlphaFold3 server predictions
 
 ## Server Based Predictions
-Go to [https://alphafoldserver.com/](https://alphafoldserver.com/) and sign-in with a gmail account and agree to any necessary terms. If you want, you can manually add the sequences using the GUI, but we provide an easier way to generate multiple jobs using a single input JSON, using a handy python script included in this repo. Please note, you must process your data in batches of 100 or fewer rows at a time, since the server only accepts JSONs with 100 jobs max at a time. Also note that although you upload a JSON with many jobs, the current quota for AF3 server will only allow ~20 jobs per person per day.
+Firs, go to [https://alphafoldserver.com/](https://alphafoldserver.com/) and sign-in with a gmail account and agree to any necessary terms.
+
+If you want, you can manually add the sequences using the GUI and run them directly, but for effiency, we provide an easier way to input multiple jobs using a single input JSON, using a handy python script included in this repo. Please note, you must process your data in batches of 100 or fewer rows at a time, since the server only accepts JSONs with 100 jobs max at a time. Also note that although you upload a JSON with many jobs, the current quota for AF3 server will only allow ~20 jobs per person per day, so it may take time for the jobs to complete.
 To generate the JSON that can be uploaded to the AF3 server, you can run the handy script:
 ```bash
 usage: prepare_server_input.py [-h] -s SEQUENCES_FILE [-a ALPHA_COL] [-b BETA_COL] [-m MHC_COL] [-p PEPTIDE_COL] [--af3-seed AF3_SEED] -o OUTPUT_DIR
@@ -60,3 +62,20 @@ Following the example above, I selected 2/4 jobs to download and ran:
 python ./scripts/extract_features_server.py -o ./examples/enfoldx_extracted_features_server -z ./examples/af3_server_outputs/folds_2026_04_21_20_08.zip -s ./examples/example_input_tcr_pmhcs.csv
 ```
 You can see the example download in `examples/af3_server_outputs`, and the example extracted features in `examples/enfoldx_extracted_features_server`
+
+#### A note on multiple seeds with AF3 Server
+A key result from our manuscript is that enFoldX works better with multiple random seeds. Unfortunately, the current server-based workflow only lets you run a single seed at a time. If you are using the GUI version, you can "Specify a seed" using the input box. If you are using the script you can specify a seed using ```--af3-seed```. If you want to create a multi-seed ensemble, you should run all of the steps above multiple times for the same input, changing the seed each time. Then, instead of using the ```ensemble_features.csv```, you should use the ```all_structures_features.csv```. You can then create your own ```ensemble_features.csv``` by running this snippet:
+
+```
+all_results_df = pd.read_csv('all_structures_features.csv',index_col=0)
+ensemble = all_results_df.groupby(by=["original_index"], dropna=False).agg(
+        ["mean", "std"]
+    )
+ensemble.columns = [f"{col}_{stat}" for col, stat in ensemble.columns]
+columns_to_drop = [
+        col
+        for col in ensemble.columns
+        if col.startswith(("af3_seed", "af3_sample", "af3_ranking"))
+ensemble = ensemble.drop(columns=columns_to_drop).reset_index()
+ensemble.to_csv("ensemble_features.csv")
+```
