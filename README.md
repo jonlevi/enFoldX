@@ -74,7 +74,10 @@ There are currently 2 ways to run AlphaFold3 predictions:
 - [Tutorial for local installation of AF3](docs/TUTORIAL.md)
 - [Tutorial for AF3 server](docs/TUTORIAL_SERVER_BASED.md)
 
-After following the steps in either of those tutorials, you should have a CSV called `ensemble_features.csv` that can be used to predict binding below with our pre-trained models. The output also contains `all_structures_features.csv`, `avg_features.csv`, and `best_features.csv` which contains the full ensemble, just the average values over the ensemble, or the highest-ranked structure from the ensemble, respectively. For the pre-trained enFoldXs models, you will use `ensemble_features.csv`. Once you have that CSV, you can continue to the next step here.
+After following the steps in either of those tutorials, you should have a CSV called `ensemble_features.csv` that can be used to predict binding below with our pre-trained models, with means and std of each of the features across the ensemble.
+(The output also contains `all_structures_features.csv` - which contains the full ensemble without any collapsing,  `avg_features.csv` - only the average values over the ensemble, and `best_features.csv` the highest-ranked structure from the ensemble.)
+
+For the pre-trained enFoldXs models below, you will need to use `ensemble_features.csv`. Once you have that CSV, you can continue to the next step here.
 
 ## Step 3: Predict Binding
 TODO: @olga to add pre-trained models here, as well as any other advice about scaling etc.
