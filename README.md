@@ -1,4 +1,4 @@
-# enFoldX: Leveraging ensembles of predicted structures for complex binding prediction
+# enFoldX: Leveraging ensembles of in silico structures for complex binding prediction
 
 
 enFoldX (**En**semble of **Fold**ed Comple**X**es) enables the binding prediction of large datasets of input sequences by extracting distributions of high dimensional confidence features from ensembles of predicted structures.
