@@ -68,7 +68,7 @@ etc.
 (Note: the column names above are the default names for all of the scripts in the enFoldX code, but you can override with custom column names by passing in the apporpirate flags to each script with
 `[-a <ALPHA_COL_NAME>] [-b <BETA_COL_NAME>] [-m <MHC_COL_NAME>] [-p <PEPTIDE_COL_NAME>] [-cdr3a <CDR3A_COL_NAME>] [-cdr3b <CDR3B_COL_NAME>]`)
 
-## Run AlphaFold3 Predictions
+## Step 2: Run AlphaFold3 Predictions
 
 There are currently 2 ways to run AlphaFold3 predictions:
 - [Tutorial for local installation of AF3](docs/TUTORIAL.md)
@@ -76,7 +76,7 @@ There are currently 2 ways to run AlphaFold3 predictions:
 
 After following the steps in either of those tutorials, you should have a CSV called `ensemble_features.csv` that can be used to predict binding below with our pre-trained models. The output also contains `all_structures_features.csv`, `avg_features.csv`, and `best_features.csv` which contains the full ensemble, just the average values over the ensemble, or the highest-ranked structure from the ensemble, respectively. For the pre-trained enFoldXs models, you will use `ensemble_features.csv`. Once you have that CSV, you can continue to the next step here.
 
-## Predict Binding
+## Step 3: Predict Binding
 TODO: @olga to add pre-trained models here, as well as any other advice about scaling etc.
 We include an example notebook at `analysis_notebooks/enFoldX_ML_notebook.ipynb` for how we used the features to predict specificity. The enFoldX_ML Jupyter notebook provides an example of training a Ridge regression model on the cross-reactivity dataset utilizing features prepared by the enFoldX AF3 pipeline. It includes preparation of the feature ensemble across all predicted structures for the same TCR/epitope pair and 5-fold cross-validation. The notebook needs fairly standard Python packages to be installed: numpy, pandas, sklearn, matplotlib, and seaborn.In terms of the pipeline, this notebook starts with the feature set that is created at the very end of the last step (Step 5). This notebook uses data from the cross-reactivity data that can be found as part of [a previous paper](https://www.nature.com/articles/s41586-022-04735-9).
 
