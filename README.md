@@ -83,14 +83,14 @@ We include an example notebook at `analysis_notebooks/enFoldX_ML_notebook.ipynb`
 Of course, all of these performance evaluations rely on the availability of labeled data. For the use of this tool in studying TCR-pMHCs for which the true label of binder/non-binder is not known, we recommend training on a relevant, related labeled data set, and then using the resultant model to predict specificity for the novel data. For example, you can run enFoldX to create features for all of the human data in VDJdb, then train a Logistic model on that labelled data, and then use the model to predict specificity for a new human dataset.
 
 
-## Other Misc. Code
+## Other Useful Things 
+###  Access to labeled mutational scan data used in our paper
+
+If you are looking for the labeled mutational scan datasets used for validation our paper, please visit the ```manuscript/data/mutational_scan_data``` folder. The other datasets used in the paper can be accessed directly from their original publications, as described in the methods section.
+
 ### RMSD Calculations
 You can also run the rmsd calculation that we use for the specific scenario of comparing two different TCR:pMHC complexes to each other. We use this in the first section of our paper when comparing structural diversity across an ensemble of predictions. Run the script passing in the paths for structure 1 and 2, like this example:
 ```bash
 python ./scripts/rmsd_calculation.py -s1 examples/af3_fold_outputs/index_0/seed-1_sample-0/model.cif -s2 examples/af3_fold_outputs/index_0/seed-1_sample-1/model.cif
 ```
-
-## Access to labeled mutational scan data used in our paper
-
-If you are looking for the labeled mutational scan datasets used for validation our paper, please visit the ```manuscript/data/mutational_scan_data``` folder. The other datasets used in the paper can be accessed directly from their original publications, as described in the methods section.
 
