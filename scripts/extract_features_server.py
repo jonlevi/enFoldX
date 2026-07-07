@@ -321,8 +321,10 @@ def main(args):
     ensemble = all_results_df.groupby(by=["original_index", "name"], dropna=False).agg(
         ["mean", "std"]
     )
-    ensemble = ensemble.fillna(0) # set std columns with no variance to zero with ddof=1 
-    
+    ensemble = ensemble.fillna(
+        0
+    )  # set std columns with no variance to zero with ddof=1
+
     ensemble.columns = [f"{col}_{stat}" for col, stat in ensemble.columns]
     columns_to_drop = [
         col
