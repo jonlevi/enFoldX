@@ -3,6 +3,8 @@ dependencies:
   - python=3.11
   - pandas
   - numpy
+  - scikit-learn
+  - mdtraj
   - tqdm
   - black
   - pip

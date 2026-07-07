@@ -292,6 +292,7 @@ def main(args):
         if col.startswith(("af3_seed", "af3_sample", "af3_ranking"))
     ]
     ensemble = ensemble.drop(columns=columns_to_drop).reset_index()
+    ensemble = ensemble.fillna(0) # set std columns with no variance to zero with ddof=1 
 
     all_results_df.to_csv(os.path.join(args.output_dir, "all_structures_features.csv"))
     avg_results_df.to_csv(os.path.join(args.output_dir, "avg_features.csv"))
