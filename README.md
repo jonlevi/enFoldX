@@ -92,8 +92,9 @@ Of course, all of these performance evaluations rely on the availability of labe
 If you are looking for the labeled mutational scan datasets used for validation our paper, please visit the ```manuscript/data/mutational_scan_data``` folder. The other datasets used in the paper can be accessed directly from their original publications, as described in the methods section.
 
 ### RMSD Calculations
-You can also run the pairwise RMSD calculations for assessing the structural diversity of an ensemble of predicted TCR:pMHC structures, as used in the first section of our paper. Run the script passing in the paths for the AF3 output directory with the predicted ensemble and a directory to store a CSV containing the RMSD metrics. Ex:
+You can also run the pairwise RMSD calculations for assessing the structural diversity of an ensemble of predicted TCR:pMHC structures, as used in the first section of our paper. Run the script passing in the paths for the AF3 output directory with the predicted ensemble and a directory to store a CSV containing the RMSD metrics. For example:
 ```bash
-python ./scripts/compute_pairwise_rmsd.py -d examples/af3_fold_outputs/index_0 -o examples/rsmd_metrics/index_0
+python ./scripts/compute_pairwise_rmsd.py -d examples/af3_fold_outputs/index_0/ -o  examples/pairwise_rmsd_example/
 ```
+You can look at sample output in ```examples/pairwise_rmsd_example/pairwise_rmsd.csv```. Note, this script can be sped up by allocating additional cores, as mdtraj can make use of parallelization under the hood, as explained [here](https://mdtraj.readthedocs.io/en/latest/api/generated/mdtraj.rmsd.html#mdtraj.rmsd) 
 
