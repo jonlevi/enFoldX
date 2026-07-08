@@ -3,16 +3,18 @@ import pandas as pd
 import os
 import argparse
 import mdtraj as md
+from tqdm import tqdm
 
 ##################################################################################
 
 parser = argparse.ArgumentParser(
-    description="Compute pairwise RMSD metrics of AF3-predicted ensemble.",
+    description="Compute pairwise RMSD metrics of AF3-predicted ensemble. Note this is currently only implemented for AF3 Installed version and not for the server version",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 
 parser.add_argument(
     "-d",
+    "--data-dir",
     dest="data_dir",
     required=True,
     help="Path to directory containing AF3-predicted ensemble.",
@@ -20,7 +22,8 @@ parser.add_argument(
 
 parser.add_argument(
     "-o",
-    dest="output",
+    "--output-dir",
+    dest="output_dir",
     required=True,
     help="Path to directory to write output CSV.",
 )
@@ -133,26 +136,29 @@ def compute_rmsd(cif_path_1, cif_path_2):
 ##################################################################################
 
 if __name__ == "__main__":
-    os.makedirs(f"{args.output}", exist_ok=True)
+
+    assert os.path.exists(args.data_dir), f"{args.data_dir} not found"
+
+    if not os.path.exists(args.output_dir):
+        print(f"{args.output_dir} does not exist... Creating new directory")
+        os.makedirs(args.output_dir)
+
     af3_output_path = args.data_dir
 
     data = []
 
     af3_input_name = os.path.basename(af3_output_path)
-    if os.path.isfile(f"{args.output}/{af3_input_name}.csv"):
-        print(f"Error: ensemble directory {af3_input_name} has already been checked.")
-    else:
-        ref_cif, cifs = find_cif_files(af3_output_path)
-        num_samples = len(cifs)
+    outfile = os.path.join(args.output_dir, "pairwise_rmsd.csv")
 
-        print(f"Computing RMSD metrics...")
-        for i in range(num_samples):
-            for j in range(num_samples)[i + 1 :]:
-                cifs_results = compute_rmsd(cifs[i], cifs[j])
-                data.append(cifs_results)
+    ref_cif, cifs = find_cif_files(af3_output_path)
+    num_samples = len(cifs)
 
-        keys = cifs_results.keys()
-        ensemble_results = pd.concat(data, ignore_index=True)
-        output_csv = f"{args.output}/{af3_input_name}.csv"
-        ensemble_results.to_csv(output_csv, index=False)
-        print(f"Completed: CSV with RMSD metrics written to output directory.")
+    print(f"Computing RMSD metrics...")
+    for i in tqdm(range(num_samples)):
+        for j in range(num_samples)[i + 1 :]:
+            cifs_results = compute_rmsd(cifs[i], cifs[j])
+            data.append(cifs_results)
+
+    ensemble_results = pd.concat(data, ignore_index=True)
+    ensemble_results.to_csv(outfile, index=False)
+    print(f"Completed: CSV with RMSD metrics written to {outfile}.")
