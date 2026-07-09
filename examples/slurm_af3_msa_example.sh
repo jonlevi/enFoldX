@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH --job-name=af3_msa
-#SBATCH --partition=componc_cpu
+#SBATCH --partition=<partition name>
 #SBATCH --time=01:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8

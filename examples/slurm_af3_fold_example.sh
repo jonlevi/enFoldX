@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH --job-name=af3_fold
-#SBATCH --partition=componc_gpu_batch
+#SBATCH --partition=<partition name>
 #SBATCH --ntasks=1
 #SBATCH --gpus-per-task=1
 #SBATCH --mem-per-gpu=24G
