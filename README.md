@@ -68,6 +68,7 @@ etc.
 (Note: the column names above are the default names for all of the scripts in the enFoldX code, but you can override with custom column names by passing in the apporpirate flags to each script with
 `[-a <ALPHA_COL_NAME>] [-b <BETA_COL_NAME>] [-m <MHC_COL_NAME>] [-p <PEPTIDE_COL_NAME>] [-cdr3a <CDR3A_COL_NAME>] [-cdr3b <CDR3B_COL_NAME>]`)
 
+
 ## Step 2: Run AlphaFold3 Predictions
 
 There are currently 2 ways to run AlphaFold3 predictions:
@@ -82,16 +83,18 @@ For the pre-trained enFoldXs models below, you will need to use `ensemble_featur
 ## Step 3: Predict Binding
 
 You can either train your own classifier using features generated in the steps above (on a meaningfully large labeled dataset, such as VDJdb), or use one of the pretrained models provided in the `models/` directory. A detailed description of the available models is provided in [`models/MODELS.md`](models/MODELS.md). In brief:
-- **human** (`enFoldX_human_vFebSept_DecoyPerm`): trained on VDJdb human data with decoy and permuted negatives. We recommend this model for general TCR:pMHC predictions.
-- **human_decoy** (`enFoldX_human_vFebSept_Decoy`): trained on VDJdb human data with decoy negatives. This model performs best on mutational scan datasets.
-- **mouse** (`enFoldX_mouse_vFeb_Decoy`): trained on VDJdb mouse data with decoy negatives. Use it for mouse TCR:pMHC predictions.
+- **human** (`enFoldX_human_vFebSept_DecoyPerm`): trained on VDJdb human data with decoy and permuted negatives (10-seed ensemble). We recommend this model for general TCR:pMHC predictions.
+- **human_decoy** (`enFoldX_human_vFebSept_Decoy`): trained on VDJdb human data with decoy negatives (10-seed ensemble). This model performs best on mutational scan datasets.
+- **mouse** (`enFoldX_mouse_vFeb_Decoy`): trained on VDJdb mouse data with decoy negatives (10-seed ensemble). Use it for mouse TCR:pMHC predictions.
+- **human_1seed** (`enFoldX_human_vFebSept_DecoyPerm_1seed`): trained on VDJdb human data with decoy and permuted negatives (a 1-seed ensemble, using 5 AF3 samples for just 1 AF3 seed). If your test dataset contains features for only 1 AF3 seed(for example, using the server implementation), please use this model.
 
 Each pretrained model is packaged together with its corresponding feature scaler. The script `get_cognate_predictions.py` automatically loads the selected model together with its corresponding scaler, scales the input features to the model's training feature space, generates and saves predicted probabilities of cognate TCR:pMHC binding.
 
 As with any supervised machine learning approach, model performance depends on the quality and relevance of the training data. If your target dataset differs substantially from published datasets such as VDJdb, we recommend first running the enFoldX pipeline to generate structural ensemble features, then training your own classifier on a labeled dataset that closely matches your intended application before applying it to new data.
 
-TODO: Are we keeping the example notebook?
-We include an example notebook at `analysis_notebooks/enFoldX_ML_notebook.ipynb` for how we used the features to predict specificity. The enFoldX_ML Jupyter notebook provides an example of training a Ridge regression model on the cross-reactivity dataset utilizing features prepared by the enFoldX AF3 pipeline. It includes preparation of the feature ensemble across all predicted structures for the same TCR/epitope pair and 5-fold cross-validation. The notebook needs fairly standard Python packages to be installed: numpy, pandas, sklearn, matplotlib, and seaborn.In terms of the pipeline, this notebook starts with the feature set that is created at the very end of the last step (Step 5). This notebook uses data from the cross-reactivity data that can be found as part of [a previous paper](https://www.nature.com/articles/s41586-022-04735-9).
+Please use the 10-seed models (the first three models above) if you generate features for 10-seed structural ensembles. **If you only generate AF3 structures for 1 seed, we recommend using a 1-seed model** (i.e. human_1seed model above), as performance will be slightly worse with a 10-seed model.
+
+Note that if you don't use the same sequence pre-processing as we recommend (for example, don't use Stitchr and instead use TCR sequences without the leader sequences), the feature ranges will differ from the ones used for the pretrained models, and the performance will be severely degraded. In that case, we recommend that you **consistently preprocesses all your training data** in the same way, extract features as above, and train your own classifier model.
 
 ## Other Useful Things 
 ###  Access to labeled mutational scan data used in our paper
