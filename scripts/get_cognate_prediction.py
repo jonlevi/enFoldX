@@ -1,27 +1,34 @@
-import json
 import pandas as pd
-import tqdm
 import os
 import argparse
 import numpy as np
 from enum import Enum
+import pickle
 
 
-class enFoldXModel(Enum):
-    VDJdbFebruaryDecoyRidge = 1
-    VDJdbFebruaryPermutedRidge = 2
-    VDJdbAllDecoyRidge = 3
-    VDJdbAllPermutedRidge = 4
-    # TODO: finish list of all models included in the repo
-    # TODO: do we separate training data from model type or keep them all as one list?
+class enFoldXModel(str, Enum):
+    human = "models/enFoldX_human_vFebSept_DecoyPerm.pkl"
+    human_decoy = "models/enFoldX_human_vFebSept_Decoy.pkl"
+    mouse = "models/enFoldX_mouse_vFeb_Decoy.pkl"
 
 
-def load_model(model_type):
-    return None
+def load_model_bundle(model_type: str):
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_dir = os.path.dirname(script_dir)
+    model_path = os.path.join(repo_dir, enFoldXModel[model_type].value)
+
+    with open(model_path, "rb") as f:
+        bundle = pickle.load(f)
+
+    return bundle["scaler"], bundle["model"], bundle["features"]
 
 
-def load_scaler(model_type):
-    return None
+def predict_from_model(data_predict, featurecols, scaler, model):
+    X_test = data_predict[featurecols].copy()
+    X_test_scaled = scaler.transform(X_test)
+    # y_pred = model.predict(X_test_scaled)
+    y_proba = model.predict_proba(X_test_scaled)[:, 1]
+    return y_proba
 
 
 def main(args):
@@ -33,31 +40,32 @@ def main(args):
     except Exception as e:
         print(f"Error reading CSV file: {e}")
 
-    # TODO: assert features file is formated correctly
-    assert features_df.columns == []
-
-    # TODO: get user input to determine what model and scaler to use
     model_choice = args.model
-    assert model_choice in [x for x in enFoldXModel]
+    assert model_choice in [x.name for x in enFoldXModel]
 
-    # TODO: run scaling - currently in pseudocode
-    scaler = load_scaler(model_choice)
-    scaled_data = scaler.scale(features_df)
+    scaler, model, features = load_model_bundle(model_choice)
 
-    # TODO: run model prediction - currently in pseudocode
-    model = load_model(model_choice)
-    model_predictions = model.predict(scaled_data)
+    missing_features = set(features) - set(features_df.columns)
+    if missing_features:
+        raise ValueError(f"Missing required features: {sorted(missing_features)}")
 
-    if not os.path.exists(args.output_dir):
-        print(f"{args.output_dir} does not exist... Creating new directory")
-        os.makedirs(args.output_dir)
+    y_proba = predict_from_model(
+        data_predict=features_df, featurecols=features, scaler=scaler, model=model,
+    )
 
-    print(f"Writing results to {os.path.join(args.output_dir,args.output_filename)}...")
+    non_feature_cols = [c for c in features_df.columns if c not in features]
+    if non_feature_cols:
+        model_predictions = features_df[non_feature_cols].copy()
+    else:
+        model_predictions = pd.DataFrame({"index": features_df.index})
 
-    # TODO: write results
-    model_predictions.to_csv(os.path.join(args.output_dir, args.output_filename))
+    model_predictions["enFoldX_score"] = y_proba
 
-    print(f"Output features written to {args.output_dir}")
+    os.makedirs(args.output_dir, exist_ok=True)
+    output_path = os.path.join(args.output_dir, args.output_filename)
+    model_predictions.to_csv(output_path, index=False)
+
+    print(f"Model predictions written to {output_path}")
 
 
 if __name__ == "__main__":
@@ -77,9 +85,9 @@ if __name__ == "__main__":
         "-m",
         "--model",
         type=str,
-        required=False,
-        default="XXX",  # TODO: set default model choice
-        help="Choose which pre-trained enFoldX model to use",
+        choices=[x.name for x in enFoldXModel],
+        default="human",
+        help="Pre-trained enFoldX model to use.",
     )
 
     parser.add_argument(
@@ -87,18 +95,16 @@ if __name__ == "__main__":
         "--output-dir",
         type=str,
         required=True,
-        help="Directory to place output CSV files with features",
+        help="Directory to save the output CSV file with enFoldX scores.",
     )
 
     parser.add_argument(
         "-of",
         "--output-filename",
         type=str,
-        required=False,
         default="enFoldX_predictions.csv",
-        help="Filename for output CSV files with features",
+        help="Filename for output CSV file with enFoldX scores.",
     )
 
     args = parser.parse_args()
-
     main(args)
