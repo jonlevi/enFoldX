@@ -1,17 +1,17 @@
 #!/bin/bash
 #
 #SBATCH --job-name=af3_msa
-#SBATCH --partition=<partition>
+#SBATCH --partition=componc_cpu
 #SBATCH --time=01:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=1G
-#SBATCH --array=1-6
+#SBATCH --array=1-5
 
 # ^ set array size to number of input JSONs
 
 # load config
-source ../af3_config.sh
+source ./af3_config.sh
 
 # set input path to directory of JSONs
 json_dir="examples/af3_msa_inputs"

@@ -47,26 +47,33 @@ To run enFoldX, you need to essentially run 3 main steps:
 
 The first step is detailed below. The second step for running AF3 can be found in the companion tutorial files, depending on if you are using the local installation or the server.
 
+# enFoldX Tutorial
+
+## Step 0: Tutorial data
+For this tutorial, we will be analyzing two TCRs from [this paper](https://pubmed.ncbi.nlm.nih.gov/37490916/), MEL8 and MEL5, together with 9 peptides (3 cognates, 6 non-cognates). See the paper for details. We downloaded the VDJ calls and peptides and copied them to `examples/MEL_data/`.
+
 ## Step 1: Prepare sequence inputs
 
 ### TCRs
-In order to run this pipeline, you will need a file that contains one row per TCR-pMHC complex that you wish to predict. If you already have full length TCR sequences, you can skip this step. For instructions on how to go from `V`, `J`, `CDR3` calls to full length TCR sequences, have a look at our [tutorial](https://github.com/jonlevi/enFoldX/blob/main/docs/format_tcr_sequences.md). (Note that full length includes leader/constant/framework sequences, not just the variable regions).
+In order to run this pipeline, you will need a file that contains one row per TCR-pMHC complex that you wish to predict. If you already have full length TCR sequences, you can skip this step. For instructions on how to go from `V`, `J`, `CDR3` calls to full length TCR sequences, have a look at our [tutorial](https://github.com/jonlevi/enFoldX/blob/main/docs/format_tcr_sequences.md). (Note that full length includes leader/constant/framework sequences, not just the variable regions). Please note that stitchr outputs a *T*SV, but the required input for the first step below is a *C*SV. For our MEL TCRs, the result of running stitchr should give you a TSV that looks like `examples/MEL_data/MEL_tcrs_stitchr_out.tsv`. 
 
 ### MHC
-You will also need the full length sequences for any MHC/HLA chains you want to model. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/. For convenience, we include the [sequences of many common HLA alleles](https://github.com/jonlevi/enFoldX/blob/main/MHC_sequences/) together with our repo.
+You will also need the full length sequences for any MHC/HLA chains you want to model. For MHC sequence information, you can look up the allele in [Uniprot](https://www.uniprot.org/uniprotkb) or IPD-IMGT/HLA at https://www.ebi.ac.uk/ipd/imgt/hla/alleles/. For convenience, we include the [sequences of many common HLA alleles](https://github.com/jonlevi/enFoldX/blob/main/MHC_sequences/) together with our repo. For our MEL TCRs, the HLA is HLA-A0201, whose sequence we copy from [there](https://github.com/jonlevi/enFoldX/blob/main/MHC_sequences/HLA-A*02:01.fasta). 
 
 ### Output
-In order to continue with the next steps, you need a CSV that has columns containig the full-length amino acids sequences for the TCRa, TCRb, MHC, and peptide sequence per row. It also must contain the sequences of the CDR3a and the CDR3b, which must be substrings of the TCRa and TCRb respectively. Your CSV should look something like this:
+In order to continue with the next steps, you need a CSV that has columns containig the full-length amino acids sequences for the TCRa, TCRb, MHC, and peptide sequence per row. It also must contain the sequences of the CDR3a and the CDR3b, which must be substrings of the TCRa and TCRb respectively, and a unique complex_id to identify the row. Don't include any spaces or weird characters in the complex_id column, since it may conflict with AlphaFold3 required naming conventions and cause an error. Your CSV should look something like this:
 
-| TRA_aa   | TRA_CDR3         | TRB_aa   | TRB_CDR3         | M_aa     | peptide   |
+complex_id |  TRA_aa   | TRA_CDR3         | TRB_aa   | TRB_CDR3         | M_aa     | peptide   |
 |----------|------------------|----------|------------------|----------|-----------|
-| MDSSPG... | CALGDPPNTGKLTF  | MGSRL... | CASTSGVGQDTQYF   | MVPCTL... | TVYGFCLL |
-| MLILS...  | CAMRSSGGSNAKLTF | MGAMA... | CASSGGANTGQLYF   | MVPCTL... | ASNENMETM |
+complex_1 | MDSSPG... | CALGDPPNTGKLTF  | MGSRL... | CASTSGVGQDTQYF   | MVPCTL... | TVYGFCLL |
+complex_2 | MLILS...  | CAMRSSGGSNAKLTF | MGAMA... | CASSGGANTGQLYF   | MVPCTL... | ASNENMETM |
 
 etc.
 
 (Note: the column names above are the default names for all of the scripts in the enFoldX code, but you can override with custom column names by passing in the apporpirate flags to each script with
-`[-a <ALPHA_COL_NAME>] [-b <BETA_COL_NAME>] [-m <MHC_COL_NAME>] [-p <PEPTIDE_COL_NAME>] [-cdr3a <CDR3A_COL_NAME>] [-cdr3b <CDR3B_COL_NAME>]`)
+`[-i ID_COL] [-a <ALPHA_COL_NAME>] [-b <BETA_COL_NAME>] [-m <MHC_COL_NAME>] [-p <PEPTIDE_COL_NAME>] [-cdr3a <CDR3A_COL_NAME>] [-cdr3b <CDR3B_COL_NAME>]`).
+
+For our MEL TCRs, you can see the full formatted input CSV at ```examples/MEL_data/MEL_enfoldx_input.csv```.
 
 ## Step 2: Run AlphaFold3 Predictions
 

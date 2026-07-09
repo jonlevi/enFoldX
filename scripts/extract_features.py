@@ -4,6 +4,7 @@ import tqdm
 import os
 import argparse
 import numpy as np
+import re
 
 
 def find_cdr_index(full_chain_seq, cdr3_seq):
@@ -187,6 +188,7 @@ def main(args):
         ("peptide", args.peptide_col),
         ("cdr3a", args.cdr3alpha_col),
         ("cdr3b", args.cdr3beta_col),
+        ("complex_id", args.id_col),
     ]:
         assert (
             col in seq_df.columns
@@ -217,7 +219,11 @@ def main(args):
     rows = []
     for i, (idx, row) in tqdm.tqdm(enumerate(seq_df.iterrows())):
 
-        path = os.path.join(args.af_output_dir, f"index_{idx}")
+        name = row[args.id_col]
+        name = name.lower()
+        name = re.sub(r"[^a-z0-9-]+", "_", name)
+        name = name.strip("_")
+        path = os.path.join(args.af_output_dir, name)
 
         ranking = f"{path}/ranking_scores.csv"
         ranking_df = pd.read_csv(ranking, header=0)
@@ -235,10 +241,11 @@ def main(args):
 
         for seed in model_seeds:
             for sample in samples:
-                row = {}
-                row["original_index"] = idx
-                row["af3_seed"] = seed
-                row["af3_sample"] = sample
+                new_row = {}
+                new_row[args.id_col] = row[args.id_col]
+                new_row["af3_output_directory"] = path
+                new_row["af3_seed"] = seed
+                new_row["af3_sample"] = sample
                 summary_path = (
                     f"{path}/seed-{seed}_sample-{sample}/summary_confidences.json"
                 )
@@ -253,26 +260,29 @@ def main(args):
                     b_cdr3_start,
                     b_cdr3_end,
                 )
-                row.update(sub_results)
+                new_row.update(sub_results)
                 ranking = ranking_df[
                     (ranking_df["seed"] == seed) & (ranking_df["sample"] == sample)
                 ]["ranking_score"].values[0]
-                row["af3_ranking"] = ranking
-                rows.append(row)
+                new_row["af3_ranking"] = ranking
+                rows.append(new_row)
 
     if not os.path.exists(args.output_dir):
         print(f"{args.output_dir} does not exist... Creating new directory")
         os.makedirs(args.output_dir)
 
     print(f"Writing results to {args.output_dir}...")
+
+    group_cols = [args.id_col, "af3_output_directory"]
+
     all_results_df = pd.DataFrame(rows)
     avg_results_df = (
-        all_results_df.groupby(by=["original_index"], dropna=False)
+        all_results_df.groupby(by=group_cols, dropna=False)
         .mean()
         .drop(columns=["af3_seed", "af3_sample", "af3_ranking"])
         .reset_index()
     )
-    best_idx = all_results_df.groupby(by=["original_index"], dropna=False)[
+    best_idx = all_results_df.groupby(by=group_cols, dropna=False)[
         "af3_ranking"
     ].idxmax()
     best_results_df = (
@@ -282,9 +292,7 @@ def main(args):
         .drop(columns="index")
     )
 
-    ensemble = all_results_df.groupby(by=["original_index"], dropna=False).agg(
-        ["mean", "std"]
-    )
+    ensemble = all_results_df.groupby(by=group_cols, dropna=False).agg(["mean", "std"])
     ensemble.columns = [f"{col}_{stat}" for col, stat in ensemble.columns]
     columns_to_drop = [
         col
@@ -337,6 +345,15 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="Directory to place output CSV files with features",
+    )
+
+    parser.add_argument(
+        "-i",
+        "--id-col",
+        type=str,
+        required=False,
+        default="complex_id",
+        help="Name of column containing unique complex ID in <--sequences-file>",
     )
 
     parser.add_argument(

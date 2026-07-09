@@ -19,13 +19,18 @@ def main(args):
         ("beta", args.beta_col),
         ("mhc", args.mhc_col),
         ("peptide", args.peptide_col),
+        ("complex_id", args.id_col),
     ]:
         assert (
             col in seq_df.columns
-        ), f"Missing {name} sequence column which was to {col}. Please check it is set properly and try again."
+        ), f"Missing {name} column which was to {col}. Please check it is set properly and try again."
         assert (
             seq_df[col].notna().all() and (seq_df[col] != "").all()
         ), f"{col} contains missing values"
+
+    assert seq_df[
+        args.id_col
+    ].is_unique, f"ID Column ({args.id_col}) entries are not unique!"
 
     try:
         chain_map_df = pd.read_table(args.chain_id_map)
@@ -101,7 +106,7 @@ def main(args):
 
         this_af_input = base_dict.copy()
         this_af_input["sequences"] = []
-        this_af_input["name"] = f"index_{idx}"
+        this_af_input["name"] = row[args.id_col]
 
         j_path = os.path.join(fold_input_path, f"{this_af_input['name']}.json")
 
@@ -169,6 +174,15 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="Path to input file with TCR-pMHC sequences",
+    )
+
+    parser.add_argument(
+        "-i",
+        "--id-col",
+        type=str,
+        required=False,
+        default="complex_id",
+        help="Name of column containing unique complex ID in <--sequences-file>",
     )
 
     parser.add_argument(

@@ -1,16 +1,16 @@
 #!/bin/bash
 #
 #SBATCH --job-name=af3_fold
-#SBATCH --partition=<partition>
+#SBATCH --partition=componc_gpu_batch
 #SBATCH --ntasks=1
 #SBATCH --gpus-per-task=1
-#SBATCH --mem-per-gpu=10G
-#SBATCH --array=1-4
+#SBATCH --mem-per-gpu=24G
+#SBATCH --array=1-18
 
 # ^ set array size to number of rows in input sequence CSV
 
 # load config
-source ../af3_config.sh
+source ./af3_config.sh
 
 # set input path to directory of JSONs
 json_dir="examples/af3_fold_inputs"

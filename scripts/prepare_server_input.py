@@ -33,7 +33,7 @@ def get_next_json_path(output_dir: str) -> str:
 JSON_MAX_LENGTH = 100
 
 AF3_BASE_DICT = {
-    "name": "AGTRNIDYL",
+    "name": "",
     "dialect": "alphafoldserver",
     "version": 1,
     "dialect": "alphafold3",
@@ -65,13 +65,18 @@ def main(args):
         ("beta", args.beta_col),
         ("mhc", args.mhc_col),
         ("peptide", args.peptide_col),
+        ("complex_id", args.id_col),
     ]:
         assert (
             col in seq_df.columns
-        ), f"Missing {name} sequence column which was to {col}. Please check it is set properly and try again."
+        ), f"Missing {name} column which was to {col}. Please check it is set properly and try again."
         assert (
             seq_df[col].notna().all() and (seq_df[col] != "").all()
         ), f"{col} contains missing values"
+
+    assert seq_df[
+        args.id_col
+    ].is_unique, f"ID Column ({args.id_col}) entries are not unique!"
 
     if not os.path.exists(args.output_dir):
         print(f"{args.output_dir} does not exist... Creating new directory")
@@ -86,7 +91,7 @@ def main(args):
 
     for i, (idx, row) in tqdm.tqdm(enumerate(seq_df.iterrows())):
         dd = AF3_BASE_DICT.copy()
-        dd["name"] = f"index_{idx}"
+        dd["name"] = row[args.id_col]
         dd["modelSeeds"] = [args.af3_seed]
         dd["sequences"] = [
             make_chain("A", row[args.alpha_col]),
@@ -154,6 +159,14 @@ if __name__ == "__main__":
         default="peptide",
         help="Name of column containing peptide sequence in <--sequences-file>",
     )
+    parser.add_argument(
+        "-i",
+        "--id-col",
+        type=str,
+        required=False,
+        default="complex_id",
+        help="Name of column containing unique complex ID in <--sequences-file>",
+    )
 
     parser.add_argument(
         "--af3-seed",
@@ -168,7 +181,7 @@ if __name__ == "__main__":
         "--output-dir",
         type=str,
         required=True,
-        help="Directory to place output JSON files",
+        help="Directory to place output JSON file",
     )
 
     args = parser.parse_args()

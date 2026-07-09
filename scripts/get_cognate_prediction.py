@@ -50,7 +50,10 @@ def main(args):
         raise ValueError(f"Missing required features: {sorted(missing_features)}")
 
     y_proba = predict_from_model(
-        data_predict=features_df, featurecols=features, scaler=scaler, model=model,
+        data_predict=features_df,
+        featurecols=features,
+        scaler=scaler,
+        model=model,
     )
 
     non_feature_cols = [c for c in features_df.columns if c not in features]

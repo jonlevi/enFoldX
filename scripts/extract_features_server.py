@@ -232,9 +232,13 @@ def main(args):
 
     # Write the files
     rows = []
+    print(f"Unzipping files...")
     af3_dir = unzip_file(args.zip_file)
-    for subdir in os.listdir(af3_dir):
+    print(f"Processing results...")
+    for subdir in tqdm.tqdm(os.listdir(af3_dir)):
         if not os.path.isdir(os.path.join(af3_dir, subdir)):
+            continue
+        if "ipynb" in subdir:
             continue
 
         input_json = os.path.join(af3_dir, subdir, f"fold_{subdir}_job_request.json")
@@ -257,8 +261,6 @@ def main(args):
             original_df_row.shape[0] == 1
         ), f"Seq df must have exactly one row per input TCR-pMHC, but we found  {original_df_row.shape[0]} for {subdir}"
 
-        original_index = original_df_row.index.values[0]
-
         TRA = original_df_row[args.alpha_col].values[0]
         cdr3a = original_df_row[args.cdr3alpha_col].values[0]
         TRB = original_df_row[args.beta_col].values[0]
@@ -275,8 +277,6 @@ def main(args):
             new_row = {}
             new_row["name"] = input_data["name"]
             new_row["af3_seed"] = int(input_data["modelSeeds"][0])
-
-            new_row["original_index"] = original_index
             new_row["af3_sample"] = sample
             summary_path = os.path.join(
                 af3_dir, subdir, f"fold_{subdir}_summary_confidences_{sample}.json"
@@ -303,14 +303,12 @@ def main(args):
     print(f"Writing results to {args.output_dir}...")
     all_results_df = pd.DataFrame(rows)
     avg_results_df = (
-        all_results_df.groupby(by=["original_index", "name"], dropna=False)
+        all_results_df.groupby(by="name", dropna=False)
         .mean()
         .drop(columns=["af3_seed", "af3_sample", "af3_ranking"])
         .reset_index()
     )
-    best_idx = all_results_df.groupby(by=["original_index"], dropna=False)[
-        "af3_ranking"
-    ].idxmax()
+    best_idx = all_results_df.groupby(by="name", dropna=False)["af3_ranking"].idxmax()
     best_results_df = (
         all_results_df.loc[best_idx]
         .drop(columns=["af3_seed", "af3_sample", "af3_ranking"])
@@ -318,9 +316,7 @@ def main(args):
         .drop(columns="index")
     )
 
-    ensemble = all_results_df.groupby(by=["original_index", "name"], dropna=False).agg(
-        ["mean", "std"]
-    )
+    ensemble = all_results_df.groupby(by="name", dropna=False).agg(["mean", "std"])
     ensemble = ensemble.fillna(
         0
     )  # set std columns with no variance to zero with ddof=1
