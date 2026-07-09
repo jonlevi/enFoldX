@@ -227,8 +227,8 @@ if __name__ == "__main__":
         "--af3-seeds",
         type=str,
         required=False,
-        help="comma-separated string of seeds to input to AF3",
-        default="1,2,5,10,17",
+        help="comma-separated string of seeds to input to AF3; default is 10 seeds",
+        default="1,13,17,21,42,133,177,213,315,1001",
     )
 
     parser.add_argument(
