@@ -15,14 +15,14 @@ Each model is distributed as a serialized Python pickle (`.pkl`) file containing
 ## Model 1: enFoldX_human_vFebSept_DecoyPerm
 
 **Description:**  
-This is a L2-regularized logistic regression enFoldX model trained on VDJdb Human data (09/2025 and 02/2025 releases, records with VDJdb score 1+), with Decoy and Permuted negatives, as described in the manuscript. This is our recommended model make cognate/non-cognate predictions on all human TCR:pMHC complexes.
+This is a L2-regularized logistic regression enFoldX model trained on VDJdb Human data (09/2025 and 02/2025 releases, records with VDJdb score 1+), with Decoy and Permuted negatives, as described in the manuscript. This is our recommended model make cognate/non-cognate predictions on all human TCR:pMHC complexes. This model was trained with features from an 10-seed ensemble of structures.
 
 ---
 
 ## Model 2: enFoldX_human_vFebSept_Decoy
 
 **Description:**  
-This is a L2-regularized logistic regression enFoldX model trained on VDJdb Human data (09/2025 and 02/2025 releases, records with VDJdb score 1+), with Decoy negatives, as described in the manuscript. This is our recommended model for inference on mutational scan data.
+This is a L2-regularized logistic regression enFoldX model trained on VDJdb Human data (09/2025 and 02/2025 releases, records with VDJdb score 1+), with Decoy negatives, as described in the manuscript. This is our recommended model for inference on mutational scan data. This model was trained with features from an 10-seed ensemble of structures.
 
 
 ---
@@ -30,7 +30,7 @@ This is a L2-regularized logistic regression enFoldX model trained on VDJdb Huma
 ## Model 3: enFoldX_mouse_vFeb_Decoy
 
 **Description:**  
-This is a L2-regularized logistic regression enFoldX model trained on VDJdb Mouse data (02/2025 releases, records with VDJdb score 1+), with Decoy negatives, as described in the manuscript. Please use it for all mouse TCR:pMHC data.
+This is a L2-regularized logistic regression enFoldX model trained on VDJdb Mouse data (02/2025 releases, records with VDJdb score 1+), with Decoy negatives, as described in the manuscript. Please use it for all mouse TCR:pMHC data. This model was trained with features from an 10-seed ensemble of structures.
 
 
 ---
