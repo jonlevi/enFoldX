@@ -80,11 +80,18 @@ After following the steps in either of those tutorials, you should have a CSV ca
 For the pre-trained enFoldXs models below, you will need to use `ensemble_features.csv`. Once you have that CSV, you can continue to the next step here.
 
 ## Step 3: Predict Binding
-TODO: @olga to add pre-trained models here, as well as any other advice about scaling etc.
+
+You can either train your own classifier using features generated in the steps above (on a meaningfully large labeled dataset, such as VDJdb), or use one of the pretrained models provided in the `models/` directory. A detailed description of the available models is provided in [`models/MODELS.md`](models/MODELS.md). In brief:
+- **human** (`enFoldX_human_vFebSept_DecoyPerm`): trained on VDJdb human data with decoy and permuted negatives. We recommend this model for general TCR:pMHC predictions.
+- **human_decoy** (`enFoldX_human_vFebSept_Decoy`): trained on VDJdb human data with decoy negatives. This model performs best on mutational scan datasets.
+- **mouse** (`enFoldX_mouse_vFeb_Decoy`): trained on VDJdb mouse data with decoy negatives. Use it for mouse TCR:pMHC predictions.
+
+Each pretrained model is packaged together with its corresponding feature scaler. The script `get_cognate_predictions.py` automatically loads the selected model together with its corresponding scaler, scales the input features to the model's training feature space, generates and saves predicted probabilities of cognate TCR:pMHC binding.
+
+As with any supervised machine learning approach, model performance depends on the quality and relevance of the training data. If your target dataset differs substantially from published datasets such as VDJdb, we recommend first running the enFoldX pipeline to generate structural ensemble features, then training your own classifier on a labeled dataset that closely matches your intended application before applying it to new data.
+
+TODO: Are we keeping the example notebook?
 We include an example notebook at `analysis_notebooks/enFoldX_ML_notebook.ipynb` for how we used the features to predict specificity. The enFoldX_ML Jupyter notebook provides an example of training a Ridge regression model on the cross-reactivity dataset utilizing features prepared by the enFoldX AF3 pipeline. It includes preparation of the feature ensemble across all predicted structures for the same TCR/epitope pair and 5-fold cross-validation. The notebook needs fairly standard Python packages to be installed: numpy, pandas, sklearn, matplotlib, and seaborn.In terms of the pipeline, this notebook starts with the feature set that is created at the very end of the last step (Step 5). This notebook uses data from the cross-reactivity data that can be found as part of [a previous paper](https://www.nature.com/articles/s41586-022-04735-9).
-
-Of course, all of these performance evaluations rely on the availability of labeled data. For the use of this tool in studying TCR-pMHCs for which the true label of binder/non-binder is not known, we recommend training on a relevant, related labeled data set, and then using the resultant model to predict specificity for the novel data. For example, you can run enFoldX to create features for all of the human data in VDJdb, then train a Logistic model on that labelled data, and then use the model to predict specificity for a new human dataset.
-
 
 ## Other Useful Things 
 ###  Access to labeled mutational scan data used in our paper
