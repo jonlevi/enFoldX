@@ -10,6 +10,7 @@ class enFoldXModel(str, Enum):
     human = "models/enFoldX_human_vFebSept_DecoyPerm.pkl"
     human_decoy = "models/enFoldX_human_vFebSept_Decoy.pkl"
     mouse = "models/enFoldX_mouse_vFeb_Decoy.pkl"
+    human_1seed = "models/enFoldX_human_vFebSept_DecoyPerm_1seed.pkl"
 
 
 def load_model_bundle(model_type: str):
