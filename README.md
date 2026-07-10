@@ -114,7 +114,7 @@ options:
 
 For the MEL TCRs, this scrip would be called like this, using the decoy human model:
 ```
-python ./scripts/get_cognate_prediction.py -f examples/enfoldx_extracted_features/ensemble_features.csv -m human -o examples/enfoldx_predictions/ -h human_decoy
+python ./scripts/get_cognate_prediction.py -f examples/enfoldx_extracted_features/ensemble_features.csv -m human_decoy -o examples/enfoldx_predictions/ 
 ```
 and the results are written to ```examples/enfoldx_predictions/enFoldX_predictions.csv```. Here is what the results should look like for the MEL TCRs:
 
