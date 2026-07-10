@@ -36,14 +36,14 @@ to create a `enfoldx_env` virtual environment, and then activate it. The environ
 ## Getting Started
 You can run enFoldX with AF3 locally installed, or by using the [AF3 server](https://alphafoldserver.com/). We include more detailed instructions for both of these options [below](#run-alphafold3-predictions).
 
-**We highly recommend using local installation of AF3 for enFoldX, as it allows for the incorporation of multiple seeds at the same time**. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you need to run multiple identical job submissions with different input seeds, and then collect the results yourself, but this is rather hard to scale up. You also cannot separate the MSA steps from the diffusion steps on the AF3 server, which also limits your ability to re-use MSAs, which is critical for efficient prediction of the same TCR against multple potential peptides.
+ **At the moment, our pre-trained VDJdb models can only be run using the locally installed.**  There are some differences in the way the server processes inputs than the local installation, and so our pre-trained models are not calibrated for server outputs. We are actively working on this feature, and will update the repo when we add this functionality. In general, we highly recommend using local installation of AF3 for enFoldX anyway, as it allows for the incorporation of multiple seeds at the same time. Currently, AlphaFold Server runs just one seed for each job. If you want to sample multiple seeds, you need to run multiple identical job submissions with different input seeds, and then collect the results yourself, but this is rather hard to scale up. You also cannot separate the MSA steps from the diffusion steps on the AF3 server, which also limits your ability to re-use MSAs, which is critical for efficient prediction of the same TCR against multple potential peptides.
 
 We provide step-by-step tutorials for how to use enFoldX for either the installed AF3 as for the server AF3:
 
 To run enFoldX, you need to essentially run 3 main steps:
 1) [Prepare sequence inputs](#prepare-sequence-inputs)
 2) [Run Structure Predictions and Extract Features](#run-alphafold3-predictions)
-3) [Predict binding](#predict-binding)
+3) [Predict binding](#predict-binding) <--- Currently only available for locally installed pipeline!
 
 The first step is detailed below. The second step for running AF3 can be found in the companion tutorial files, depending on if you are using the local installation or the server.
 
@@ -82,18 +82,20 @@ There are currently 2 ways to run AlphaFold3 predictions:
 - [Tutorial for local installation of AF3](docs/TUTORIAL.md)
 - [Tutorial for AF3 server](docs/TUTORIAL_SERVER_BASED.md)
 
-After following the steps in either of those tutorials, you should have a CSV called `ensemble_features.csv` that can be used to predict binding below with our pre-trained models, with means and std of each of the features across the ensemble.
+After following the steps in either of those tutorials, you should have a CSV called `ensemble_features.csv` with the enFoldX feature set described in the paper. For the local installation, this CSV can be used to predict binding below with our pre-trained models, with means and std of each of the features across the ensemble.
 (The output also contains `all_structures_features.csv` - which contains the full ensemble without any collapsing,  `avg_features.csv` - only the average values over the ensemble, and `best_features.csv` the highest-ranked structure from the ensemble.)
 
 For the pre-trained enFoldXs models below, you will need to use `ensemble_features.csv`. Once you have that CSV, you can continue to the next step here.
 
 ## Step 3: Predict Binding
 
-You can either train your own classifier using features generated in the steps above (on a meaningfully large labeled dataset, such as VDJdb), or use one of the pretrained models provided in the `models/` directory. A detailed description of the available models is provided in [`models/MODELS.md`](models/MODELS.md). In brief:
+You can either train your own classifier using features generated in the steps above (on a meaningfully large labeled dataset, such as VDJdb), or use one of the pretrained models provided in the `models/` directory. **These models are currently only calibrated for AF3 local installation outputs and not for server-based outputs**.
+
+A detailed description of the available models is provided in [`models/MODELS.md`](models/MODELS.md). In brief:
 - **human** (`enFoldX_human_vFebSept_DecoyPerm`): trained on VDJdb human data with decoy and permuted negatives (10-seed ensemble). We recommend this model for general TCR:pMHC predictions.
 - **human_decoy** (`enFoldX_human_vFebSept_Decoy`): trained on VDJdb human data with decoy negatives (10-seed ensemble). This model performs best on mutational scan datasets, and T Cell cross-reactivity tasks like the MEL TCRs. 
 - **mouse** (`enFoldX_mouse_vFeb_Decoy`): trained on VDJdb mouse data with decoy negatives (10-seed ensemble). Use it for mouse TCR:pMHC predictions.
-- **human_1seed** (`enFoldX_human_vFebSept_DecoyPerm_1seed`): trained on VDJdb human data with decoy and permuted negatives (a 1-seed ensemble, using 5 AF3 samples for just 1 AF3 seed). If your test dataset contains features for only 1 AF3 seed (for example, using the server implementation), please use this model.
+- **human_1seed** (`enFoldX_human_vFebSept_DecoyPerm_1seed`): trained on VDJdb human data with decoy and permuted negatives (a 1-seed ensemble, using 5 AF3 samples for just 1 AF3 seed for quickest runtime). If your test dataset contains features for only 1 AF3 seed, please use this model.
 
 Each pretrained model is packaged together with its corresponding feature scaler. The script `get_cognate_predictions.py` automatically loads the selected model together with its corresponding scaler, scales the input features to the model's training feature space, generates and saves predicted probabilities of cognate TCR:pMHC binding:
 
