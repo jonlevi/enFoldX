@@ -63,10 +63,10 @@ You will also need the full length sequences for any MHC/HLA chains you want to 
 ### Output
 In order to continue with the next steps, you need a CSV that has columns containig the full-length amino acids sequences for the TCRa, TCRb, MHC, and peptide sequence per row. It also must contain the sequences of the CDR3a and the CDR3b, which must be substrings of the TCRa and TCRb respectively, and a unique complex_id to identify the row. Don't include any spaces or weird characters in the complex_id column, since it may conflict with AlphaFold3 required naming conventions and cause an error. Your CSV should look something like this:
 
-complex_id |  TRA_aa   | TRA_CDR3         | TRB_aa   | TRB_CDR3         | M_aa     | peptide   |
-|----------|------------------|----------|------------------|----------|-----------|
-complex_1 | MDSSPG... | CALGDPPNTGKLTF  | MGSRL... | CASTSGVGQDTQYF   | MVPCTL... | TVYGFCLL |
-complex_2 | MLILS...  | CAMRSSGGSNAKLTF | MGAMA... | CASSGGANTGQLYF   | MVPCTL... | ASNENMETM |
+| complex_id | TRA_aa    | TRA_CDR3         | TRB_aa    | TRB_CDR3        | M_aa      | peptide   |
+|------------|-----------|------------------|-----------|-----------------|-----------|-----------|
+| complex_1  | MDSSPG... | CALGDPPNTGKLTF   | MGSRL...  | CASTSGVGQDTQYF  | MVPCTL... | TVYGFCLL  |
+| complex_2  | MLILS...  | CAMRSSGGSNAKLTF  | MGAMA...  | CASSGGANTGQLYF  | MVPCTL... | ASNENMETM |
 
 etc.
 
