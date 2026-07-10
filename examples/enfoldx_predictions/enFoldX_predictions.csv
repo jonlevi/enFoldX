@@ -1,0 +1,19 @@
+Unnamed: 0,complex_id,af3_output_directory,enFoldX_score
+0,MEL5_BST2-10,examples/af3_fold_outputs/mel5_bst2-10,0.6902265623215638
+1,MEL5_BST2-9,examples/af3_fold_outputs/mel5_bst2-9,0.28136709385632547
+2,MEL5_DSE,examples/af3_fold_outputs/mel5_dse,0.39005100653706715
+3,MEL5_ERBB2,examples/af3_fold_outputs/mel5_erbb2,0.4762982203931066
+4,MEL5_IMP1,examples/af3_fold_outputs/mel5_imp1,0.38384328582715677
+5,MEL5_IMP2,examples/af3_fold_outputs/mel5_imp2,0.6255748354675611
+6,MEL5_MRP3,examples/af3_fold_outputs/mel5_mrp3,0.5404260209097498
+7,MEL5_MUC-16TSS,examples/af3_fold_outputs/mel5_muc-16tss,0.06703284911996645
+8,MEL5_MelanA,examples/af3_fold_outputs/mel5_melana,0.7999363034732151
+9,MEL8_BST2-10,examples/af3_fold_outputs/mel8_bst2-10,0.7344173647394115
+10,MEL8_BST2-9,examples/af3_fold_outputs/mel8_bst2-9,0.5345716836473998
+11,MEL8_DSE,examples/af3_fold_outputs/mel8_dse,0.7028963371568883
+12,MEL8_ERBB2,examples/af3_fold_outputs/mel8_erbb2,0.3424612716719098
+13,MEL8_IMP1,examples/af3_fold_outputs/mel8_imp1,0.6163286775662153
+14,MEL8_IMP2,examples/af3_fold_outputs/mel8_imp2,0.927314307622156
+15,MEL8_MRP3,examples/af3_fold_outputs/mel8_mrp3,0.5610793779835929
+16,MEL8_MUC-16TSS,examples/af3_fold_outputs/mel8_muc-16tss,0.09293938647979094
+17,MEL8_MelanA,examples/af3_fold_outputs/mel8_melana,0.926296045315866

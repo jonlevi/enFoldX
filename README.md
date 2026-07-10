@@ -8,7 +8,7 @@ This repo provides code for a pipeline to run enFoldX. This implementation of en
 
 ## enFoldX
 
-![Project Banner](https://github.com/jonlevi/af3_tcr_pipeline/blob/main/enfoldx_diagram.png) 
+![Project Banner](https://github.com/jonlevi/enFoldX/blob/main/enfoldx_diagram.png) 
 
 
 ## Terms of Use
@@ -91,11 +91,34 @@ For the pre-trained enFoldXs models below, you will need to use `ensemble_featur
 
 You can either train your own classifier using features generated in the steps above (on a meaningfully large labeled dataset, such as VDJdb), or use one of the pretrained models provided in the `models/` directory. A detailed description of the available models is provided in [`models/MODELS.md`](models/MODELS.md). In brief:
 - **human** (`enFoldX_human_vFebSept_DecoyPerm`): trained on VDJdb human data with decoy and permuted negatives (10-seed ensemble). We recommend this model for general TCR:pMHC predictions.
-- **human_decoy** (`enFoldX_human_vFebSept_Decoy`): trained on VDJdb human data with decoy negatives (10-seed ensemble). This model performs best on mutational scan datasets.
+- **human_decoy** (`enFoldX_human_vFebSept_Decoy`): trained on VDJdb human data with decoy negatives (10-seed ensemble). This model performs best on mutational scan datasets, and T Cell cross-reactivity tasks like the MEL TCRs. 
 - **mouse** (`enFoldX_mouse_vFeb_Decoy`): trained on VDJdb mouse data with decoy negatives (10-seed ensemble). Use it for mouse TCR:pMHC predictions.
-- **human_1seed** (`enFoldX_human_vFebSept_DecoyPerm_1seed`): trained on VDJdb human data with decoy and permuted negatives (a 1-seed ensemble, using 5 AF3 samples for just 1 AF3 seed). If your test dataset contains features for only 1 AF3 seed(for example, using the server implementation), please use this model.
+- **human_1seed** (`enFoldX_human_vFebSept_DecoyPerm_1seed`): trained on VDJdb human data with decoy and permuted negatives (a 1-seed ensemble, using 5 AF3 samples for just 1 AF3 seed). If your test dataset contains features for only 1 AF3 seed (for example, using the server implementation), please use this model.
 
-Each pretrained model is packaged together with its corresponding feature scaler. The script `get_cognate_predictions.py` automatically loads the selected model together with its corresponding scaler, scales the input features to the model's training feature space, generates and saves predicted probabilities of cognate TCR:pMHC binding.
+Each pretrained model is packaged together with its corresponding feature scaler. The script `get_cognate_predictions.py` automatically loads the selected model together with its corresponding scaler, scales the input features to the model's training feature space, generates and saves predicted probabilities of cognate TCR:pMHC binding:
+
+```bash
+usage: get_cognate_prediction.py [-h] -f FEATURES_FILE [-m {human,human_decoy,mouse,human_1seed}] -o OUTPUT_DIR [-of OUTPUT_FILENAME]
+
+options:
+  -h, --help            show this help message and exit
+  -f FEATURES_FILE, --features-file FEATURES_FILE
+                        Path to input file with enFoldX features (default: None)
+  -m {human,human_decoy,mouse,human_1seed}, --model {human,human_decoy,mouse,human_1seed}
+                        Pre-trained enFoldX model to use. (default: human)
+  -o OUTPUT_DIR, --output-dir OUTPUT_DIR
+                        Directory to save the output CSV file with enFoldX scores. (default: None)
+  -of OUTPUT_FILENAME, --output-filename OUTPUT_FILENAME
+                        Filename for output CSV file with enFoldX scores. (default: enFoldX_predictions.csv)
+```
+
+For the MEL TCRs, this scrip would be called like this, using the decoy human model:
+```
+python ./scripts/get_cognate_prediction.py -f examples/enfoldx_extracted_features/ensemble_features.csv -m human -o examples/enfoldx_predictions/ -h human_decoy
+```
+and the results are written to ```examples/enfoldx_predictions/enFoldX_predictions.csv```. Here is what the results should look like for the MEL TCRs:
+
+![MEL TCRs](https://github.com/jonlevi/enFoldX/blob/main/examples/enfoldx_predictions/mel_prediction_boxplots.png) 
 
 As with any supervised machine learning approach, model performance depends on the quality and relevance of the training data. If your target dataset differs substantially from published datasets such as VDJdb, we recommend first running the enFoldX pipeline to generate structural ensemble features, then training your own classifier on a labeled dataset that closely matches your intended application before applying it to new data.
 

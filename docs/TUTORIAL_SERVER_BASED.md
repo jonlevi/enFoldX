@@ -77,11 +77,12 @@ all_results_df = pd.read_csv('all_structures_features.csv',index_col=0)
 ensemble = all_results_df.groupby(by=["original_index"], dropna=False).agg(
         ["mean", "std"]
     )
-ensemble.columns = [f"{col}_{stat}" for col, stat in ensemble.columns]
+ensemble.columns = [f"{col}_{stat}" if stat=='std' else col for col, stat in ensemble.columns]
 columns_to_drop = [
         col
         for col in ensemble.columns
         if col.startswith(("af3_seed", "af3_sample", "af3_ranking"))
+]
 ensemble = ensemble.drop(columns=columns_to_drop).reset_index()
 ensemble.to_csv("ensemble_features.csv")
 ```

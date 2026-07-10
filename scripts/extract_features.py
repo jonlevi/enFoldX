@@ -67,23 +67,24 @@ def parse_af3_results(
                         residues_2[0] : residues_2[-1] + 1,
                         residues_1[0] : residues_1[-1] + 1,
                     ]
-                    results[f"avg_pae_interaction_{chain1}_{chain2}"] = 0.5 * (
-                        np.mean(sub_pae1) + np.mean(sub_pae2)
+                    pae_submatrix = np.concatenate((sub_pae1, sub_pae2), axis=None)
+                    results[f"avg_pae_interaction_{chain1}_{chain2}"] = np.mean(
+                        pae_submatrix
                     )
-                    results[f"min_pae_interaction_{chain1}_{chain2}"] = min(
-                        np.min(sub_pae1), np.min(sub_pae2)
+                    results[f"min_pae_interaction_{chain1}_{chain2}"] = np.min(
+                        pae_submatrix
                     )
-                    results[f"max_pae_interaction_{chain1}_{chain2}"] = max(
-                        np.max(sub_pae1), np.max(sub_pae2)
+                    results[f"max_pae_interaction_{chain1}_{chain2}"] = np.max(
+                        pae_submatrix
+                    )
+                    results[f"std_pae_interaction_{chain1}_{chain2}"] = np.std(
+                        pae_submatrix
                     )
                     sub_contact_probs = contact_probs[
                         residues_1[0] : residues_1[-1] + 1,
                         residues_2[0] : residues_2[-1] + 1,
                     ]
                     results[f"avg_contact_probs_{chain1}_{chain2}"] = np.mean(
-                        sub_contact_probs
-                    )
-                    results[f"min_contact_probs_{chain1}_{chain2}"] = np.min(
                         sub_contact_probs
                     )
                     results[f"max_contact_probs_{chain1}_{chain2}"] = np.max(
@@ -99,12 +100,14 @@ def parse_af3_results(
                     results[f"avg_pae_{chain1}"] = np.mean(sub_pae)
                     results[f"min_pae_{chain1}"] = np.min(sub_pae)
                     results[f"max_pae_{chain1}"] = np.max(sub_pae)
+                    results[f"std_pae_{chain1}"] = np.std(sub_pae)
 
                     atoms = [int(idx) for idx in np.where(atom_chain_ids == chain1)[0]]
                     sub_plddt = plddt[atoms[0] : atoms[-1] + 1]
                     results[f"avg_plddt_{chain1}"] = np.mean(sub_plddt)
                     results[f"min_plddt_{chain1}"] = np.min(sub_plddt)
                     results[f"max_plddt_{chain1}"] = np.max(sub_plddt)
+                    results[f"std_plddt_{chain1}"] = np.max(sub_plddt)
 
         # CDR3 Metrics
         residues_alpha = [int(idx) for idx in np.where(residue_chain_ids == "A")[0]]
@@ -293,7 +296,9 @@ def main(args):
     )
 
     ensemble = all_results_df.groupby(by=group_cols, dropna=False).agg(["mean", "std"])
-    ensemble.columns = [f"{col}_{stat}" for col, stat in ensemble.columns]
+    ensemble.columns = [
+        f"{col}_{stat}" if stat == "std" else col for col, stat in ensemble.columns
+    ]
     columns_to_drop = [
         col
         for col in ensemble.columns

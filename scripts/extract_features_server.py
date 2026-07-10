@@ -11,7 +11,9 @@ from pathlib import Path
 def unzip_file(zip_path):
     zip_path = Path(zip_path)
 
-    output_dir = zip_path.parent
+    # Create output directory with the same name as the ZIP file
+    output_dir = zip_path.with_suffix("")
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     with zipfile.ZipFile(zip_path, "r") as zf:
         zf.extractall(output_dir)
@@ -36,7 +38,7 @@ def parse_af3_results(
     b_cdr3_end,
 ):
 
-    chains = ["A", "B", "C", "D"]
+    chains = ["A", "B", "D", "C"]
     chain_mapper = {"A": "A", "B": "B", "C": "P", "D": "M"}
     chain_mapper_reverse = {"A": "A", "B": "B", "P": "C", "M": "D"}
 
@@ -51,7 +53,7 @@ def parse_af3_results(
         for i, chain1 in enumerate(chains):
             results[f"chain_ptm_{chain_mapper.get(chain1)}"] = chain_ptm[i]
             for j, chain2 in enumerate(chains):
-                if chain1 < chain2:
+                if chain_mapper.get(chain1) < chain_mapper.get(chain2):
                     results[
                         f"chain_pair_iptm_{chain_mapper.get(chain1)}_{chain_mapper.get(chain2)}"
                     ] = chain_pair_iptm[i][j]
@@ -82,15 +84,19 @@ def parse_af3_results(
                         residues_2[0] : residues_2[-1] + 1,
                         residues_1[0] : residues_1[-1] + 1,
                     ]
+                    pae_submatrix = np.concatenate((sub_pae1, sub_pae2), axis=None)
                     results[
                         f"avg_pae_interaction_{chain_mapper.get(chain1)}_{chain_mapper.get(chain2)}"
-                    ] = 0.5 * (np.mean(sub_pae1) + np.mean(sub_pae2))
+                    ] = np.mean(pae_submatrix)
                     results[
                         f"min_pae_interaction_{chain_mapper.get(chain1)}_{chain_mapper.get(chain2)}"
-                    ] = min(np.min(sub_pae1), np.min(sub_pae2))
+                    ] = np.min(pae_submatrix)
                     results[
                         f"max_pae_interaction_{chain_mapper.get(chain1)}_{chain_mapper.get(chain2)}"
-                    ] = max(np.max(sub_pae1), np.max(sub_pae2))
+                    ] = np.max(pae_submatrix)
+                    results[
+                        f"std_pae_interaction_{chain_mapper.get(chain1)}_{chain_mapper.get(chain2)}"
+                    ] = np.std(pae_submatrix)
                     sub_contact_probs = contact_probs[
                         residues_1[0] : residues_1[-1] + 1,
                         residues_2[0] : residues_2[-1] + 1,
@@ -99,11 +105,9 @@ def parse_af3_results(
                         f"avg_contact_probs_{chain_mapper.get(chain1)}_{chain_mapper.get(chain2)}"
                     ] = np.mean(sub_contact_probs)
                     results[
-                        f"min_contact_probs_{chain_mapper.get(chain1)}_{chain_mapper.get(chain2)}"
-                    ] = np.min(sub_contact_probs)
-                    results[
                         f"max_contact_probs_{chain_mapper.get(chain1)}_{chain_mapper.get(chain2)}"
                     ] = np.max(sub_contact_probs)
+
                 elif i == j:
                     residues = [
                         int(idx) for idx in np.where(residue_chain_ids == chain1)[0]
@@ -114,6 +118,7 @@ def parse_af3_results(
                     results[f"avg_pae_{chain_mapper.get(chain1)}"] = np.mean(sub_pae)
                     results[f"min_pae_{chain_mapper.get(chain1)}"] = np.min(sub_pae)
                     results[f"max_pae_{chain_mapper.get(chain1)}"] = np.max(sub_pae)
+                    results[f"std_pae_{chain_mapper.get(chain1)}"] = np.std(sub_pae)
 
                     atoms = [int(idx) for idx in np.where(atom_chain_ids == chain1)[0]]
                     sub_plddt = plddt[atoms[0] : atoms[-1] + 1]
@@ -122,6 +127,8 @@ def parse_af3_results(
                     )
                     results[f"min_plddt_{chain_mapper.get(chain1)}"] = np.min(sub_plddt)
                     results[f"max_plddt_{chain_mapper.get(chain1)}"] = np.max(sub_plddt)
+                    results[f"std_plddt_{chain_mapper.get(chain1)}"] = np.max(sub_plddt)
+
         # CDR3 Metrics
         residues_alpha = [
             int(idx) for idx in np.where(residue_chain_ids == chain_mapper.get("A"))[0]
@@ -192,7 +199,7 @@ def parse_af3_results(
             results[f"max_contact_probs_cdr3b_{chain3}"] = np.max(
                 sub_contact_probs_b_chain
             )
-    return results
+
     return results
 
 
@@ -321,7 +328,9 @@ def main(args):
         0
     )  # set std columns with no variance to zero with ddof=1
 
-    ensemble.columns = [f"{col}_{stat}" for col, stat in ensemble.columns]
+    ensemble.columns = [
+        f"{col}_{stat}" if stat == "std" else col for col, stat in ensemble.columns
+    ]
     columns_to_drop = [
         col
         for col in ensemble.columns
