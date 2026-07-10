@@ -132,9 +132,25 @@ Note that if you don't use the same sequence pre-processing as we recommend (for
 If you are looking for the labeled mutational scan datasets used for validation our paper, please visit the ```manuscript/data/mutational_scan_data``` folder. The other datasets used in the paper can be accessed directly from their original publications, as described in the methods section.
 
 ### RMSD Calculations
-You can also run the pairwise RMSD calculations for assessing the structural diversity of an ensemble of predicted TCR:pMHC structures, as used in the first section of our paper. Run the script passing in the paths for the AF3 output directory with the predicted ensemble and a directory to store a CSV containing the RMSD metrics. For example:
+You can also run the pairwise RMSD calculations for assessing the structural diversity of an ensemble of predicted TCR:pMHC structures, as used in the first section of our paper. Run the script passing in the paths for the AF3 output directory with the predicted ensemble and a directory to store a CSV containing the RMSD metrics:
+
 ```bash
-python ./scripts/compute_pairwise_rmsd.py -d examples/af3_fold_outputs/index_0/ -o  examples/pairwise_rmsd_example/
+usage: compute_pairwise_rmsd.py [-h] -d DATA_DIR -o OUTPUT_DIR
+
+Compute pairwise RMSD metrics of AF3-predicted ensemble. Note this is currently only implemented for AF3 Installed version and not for the
+server version
+
+options:
+  -h, --help            show this help message and exit
+  -d DATA_DIR, --data-dir DATA_DIR
+                        Path to directory containing AF3-predicted ensemble. (default: None)
+  -o OUTPUT_DIR, --output-dir OUTPUT_DIR
+                        Path to directory to write output CSV. (default: None)
+```
+
+ For example:
+```bash
+python ./scripts/compute_pairwise_rmsd.py -d examples/af3_fold_outputs/mel8_mrp3/ -o  examples/pairwise_rmsd_example/
 ```
 You can look at sample output in ```examples/pairwise_rmsd_example/pairwise_rmsd.csv```. Note, this script can be sped up by allocating additional cores, as mdtraj can make use of parallelization under the hood, as explained [here](https://mdtraj.readthedocs.io/en/latest/api/generated/mdtraj.rmsd.html#mdtraj.rmsd) 
 
