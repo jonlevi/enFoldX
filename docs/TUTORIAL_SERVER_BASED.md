@@ -37,12 +37,12 @@ Following our previous example data:
 ```
 python ./scripts/prepare_server_input.py -s examples/MEL_data/MEL_enfoldx_input.csv -o examples/af3_server_inputs
 ```
-You can see the example output in `examples/af3_server_inputs`.
+You can see the output in `examples/af3_server_inputs` or the example tutorial data in `enfoldx_tutorial_data/af3_server_inputs`.
 
 You can now use the "Upload JSON" button in the top right of alphafoldserver.com and upload the JSON that was output from the previous script. This will pre-populate one job per row of your input CSV into your draft jobs on the bottom of the screen. You must submit each job individually by clicking on the job row, and then clicking the blue button that says "continue and preview job". Once the jobs complete you can download the outputs and continue with the steps below.
 
 ### Extract features from AlphaFold3 Server Results
-Once the jobs finish, you can select as many jobs as you ran and click the download icon. You should get a large zip file with a name that looks something like "fold_\<date\>.zip". Following the example above, I selected all 18 MEL TCR jobs to download in one zip. That zip file is too large for github, but if you want to follow along you can download it from DropBox by clicking [this link](https://www.dropbox.com/scl/fi/i3sy5rk5qh4gtuxedbak7/folds_2026_07_09_17_57.zip?rlkey=89jfqvfm9qgjr2g0e3xqw66g4&st=836dvyfn&e=1&dl=1). I placed my download in `examples/af3_server_outputs`.
+Once the jobs finish, you can select as many jobs as you ran and click the download icon. You should get a large zip file with a name that looks something like "fold_\<date\>.zip". Following the example above, I selected all 18 MEL TCR jobs to download in one zip. If you want to follow along with the tutorial data you can download it from [this link](https://github.com/jonlevi/enFoldX/releases/download/v0.1.0/folds_2026_07_09_17_57.zip) and move it to `examples/af3_server_outputs`.
 
 This zip can be used directly by the script to extract results:
 ```bash
