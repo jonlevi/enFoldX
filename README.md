@@ -24,7 +24,7 @@ Clone the repository:
 git clone --depth 1 https://github.com/jonlevi/enFoldX.git
 cd enFoldX
 ```
-Alternatively, you can download the zip file directly using the "download" option on the repository options. Either clone or download should complete in <5 minutes. If you don't include --depth 1, it will be a lot slower since some of the older git history has some large files that were subsequently moved to dropbox.
+Alternatively, you can download the zip file directly using the "download" option on the repository options. Either clone or download should complete in <5 minutes. If you don't include `--depth 1`, it will be a bit slower since some of the older git history has some large files.
 
 The python requirements to run these scripts are fairly minimal and you can run
 ```bash
