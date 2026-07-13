@@ -54,6 +54,8 @@ The first step is detailed below. The second step for running AF3 can be found i
 ## Step 0: Tutorial data
 For this tutorial, we will be analyzing two TCRs from [this paper](https://pubmed.ncbi.nlm.nih.gov/37490916/), MEL8 and MEL5, together with 9 peptides (3 cognates, 6 non-cognates). See the paper for details. We downloaded the VDJ calls and peptides and copied them to `examples/MEL_data/`.
 
+If you want to see what the results look like at each step of the pipeline, please download the tutorial data from [here](https://github.com/jonlevi/enFoldX/releases/download/v0.1.0/enfoldx_tutorial_data.zip). 
+
 ## Step 1: Prepare sequence inputs
 
 ### TCRs
