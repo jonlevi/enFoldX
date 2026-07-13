@@ -34,7 +34,7 @@ conda activate enfoldx_env
 to create a `enfoldx_env` virtual environment, and then activate it. The environment includes the basic toolkit (numpy, pandas, etc.) as well as a few tools that we interact with (biopython etc.).
 
 ## Getting Started
-You can run enFoldX with AF3 locally installed, or by using the [AF3 server](https://alphafoldserver.com/). We include more detailed instructions for both of these options [below](#run-alphafold3-predictions).
+You can run enFoldX with AF3 locally installed (i.e. on your HPC or server), or by using the [AF3 server](https://alphafoldserver.com/). We include more detailed instructions for both of these options [below](#run-alphafold3-predictions).
 
 ## Local vs. Server
  **At the moment, our pre-trained VDJdb models can only be run using the local installation of AF3.**  
