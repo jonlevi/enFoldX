@@ -28,7 +28,7 @@ There are a few sequential steps in the pipeline to go from a TCR-pMHC sequence 
 3) Collect MSA results and Format JSONs per TCR-pMHC for running AlphaFold3 Folding
 4) Run AlphaFold3 Container on Input JSONs (GPU)
 
-The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. By splitting up the MSA and folding steps, we can re-use TCR MSAs when possible, as often a user will want to fold a TCR with many potential antigens. The folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well if you have access to multiple compute nodes. This section goes through a full example of going from TCR:pMHC sequences --> enFoldX features. All of the data for the examples can be found in `examples/`
+The key idea of this pipeline is to set things up so that we can parallelize as much as possible. The MSA is run on each unique sequence independently and thus can be parallelized across each one. By splitting up the MSA and folding steps, we can re-use TCR MSAs when possible, as often a user will want to fold a TCR with many potential antigens. The folding is run on each TCR-pMHC complex independently, and thus can be parallelized as well if you have access to multiple compute nodes. This section goes through a full example of going from TCR:pMHC sequences --> enFoldX features. All of the data for the examples can be found either in `examples/` or the [downloaded tutorial data](https://github.com/jonlevi/enFoldX/releases/download/v0.1.0/enfoldx_tutorial_data.zip).
 
 #### Pipeline Step 1: Format JSONs for running AlphaFold3 MSA for each unique sequence
 ```bash
@@ -55,7 +55,7 @@ options:
 
 This script will write out one JSON per unique TCRa, TCRb, and MHC sequence in the data, as well as a metadata file mapping the sequences to their chain IDs/JSON paths. 
 
-You can see what a successful run looks like by looking at the output for the tutorial in `examples/af3_msa_inputs`
+You can see what a successful run looks like by looking at the output for the tutorial in `enfoldx_tutorial_data/af3_msa_inputs`
 
 
 #### Pipeline Step 2: Run MSA on Input Sequences
@@ -63,7 +63,7 @@ You will run the AlphaFold3 container on `--no-run-inference` mode once per MSA 
 
 An example for what a submission script might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found for the tutorial data in `slurm_af3_msa_example.sh`. If you use this submission script, make sure to adjust the partition name, the array size, the compute requests, and the input/output paths to match your preferences/requirements. Note, the array size will be larger than the size of your input CSV, since you should be running one job per unique TCRa, TCRb, and MHC. You can check what the array size for slurm should be by looking at the the number of input jsons created in Step 1 (e.g. `ls examples/af3_msa_inputs/*.json | wc -l`). For our MEL TCRs, the array should be 5, 2 for each TCR and 1 for the HLA. You would run the script by invoking ``` sbatch ./examples/slurm_af3_msa_example.sh ```.
 
-You can see what a successful MSA run looks like by looking at the output for the tutorial above in `examples/af3_msa_outputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser). There will be one JSON per unique chain (except for peptides which don't get MSA), and a metadata chain mapping file to map the MSA output to the original sequences. (You will need this chain_id_map for the next step). 
+You can see what a successful MSA run looks like by looking at the output for the tutorial. If you ran it like above it will be in `examples/af3_msa_outputs`, or you can look at the downloaded tutorial data in `enfoldx_tutorial_data/af3_msa_outputs`.  These JSON files are very large and can be difficult to view using regular IDEs or the github file browser. There will be one JSON per unique chain (except for peptides which don't get MSA), and a metadata chain mapping file to map the MSA output to the original sequences. (You will need this chain_id_map for the next step). 
 
 Troubleshooting tip: One common error we have seen is that if your TCR sequences have a "*" character in them, which is sometimes used for a stop codon, then AlphaFold will fail. Make sure to remove those TCRs, as AlphaFold cannot model them.
 
@@ -111,13 +111,13 @@ Following our previous tutorial data:
 ```
 python ./scripts/prepare_fold_input.py -s examples/MEL_data/MEL_enfoldx_input.csv -o examples/af3_fold_inputs --chain-id-map examples/af3_msa_inputs/chain_ids_to_sequences.txt --MSA-output-dir examples/af3_msa_outputs
 ```
-You can see what a successful run looks like by looking at the output for the tutorial in `examples/af3_fold_inputs` (although these JSON files are very large and can be difficult to view using regular IDEs or the github file browser). 
+You can see what a successful run looks like by looking at the output for in `examples/af3_fold_inputs` or our tutorial data in `enfoldx_tutorial_data/af3_fold_inputs`.
 
 #### Pipeline Step 4: Run AlphaFold3 Folding on Input Sequences
 You will run the AlphaFold3 container on `--norun_data_pipeline` mode once per TCR-pMHC input JSON that was created. This requires a GPU to run, see the AlphaFold3 documentation for more details. It is beneficial to run this in parallel. 
 An example for what this might look like using [slurm](https://slurm.schedmd.com/documentation.html) can be found for the tutorial data in `slurm_af3_fold_example.sh`. There will be one directory per row in the original sequences CSV file. Each directory will contain 5 X Nseeds subdirectories for each prediction, and will contain the 3D structure .cif file as well as the confidence metadata JSONs. The output will also contain a ranking scores CSV file that ranks the outputs structures, and also a copy of the results for the "best" ranked structure is saved at the top level. You can invoke the script by running ``` sbatch ./examples/slurm_af3_fold_example.sh ```.
 
-You can see what a successful run looks like by looking at the output for the example above in `examples/af3_fold_outputs`. For more information on the output of AlphaFold3, see [their docs](https://github.com/google-deepmind/alphafold3/blob/main/docs/output.md). 
+You can see what a successful run looks like by looking at the output for the example above in `examples/af3_fold_outputs` or in our tutorial data in `enfoldx_tutorial_data/af3_fold_outputs` For more information on the output of AlphaFold3, see [their docs](https://github.com/google-deepmind/alphafold3/blob/main/docs/output.md). 
 
 ## Extract features from AlphaFold3 results
 
