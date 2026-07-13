@@ -1,5 +1,9 @@
 # Tutorial for enFoldX with AlphaFold3 server predictions
 
+All of the data for the examples can be found either in `examples/` or the [downloaded tutorial data](https://github.com/jonlevi/enFoldX/releases/download/v0.1.0/enfoldx_tutorial_data.zip).
+
+** WARNING: At the moment, pre-trained enFoldX models cannot be used with server predictions**
+
 ## Server Based Predictions
 Firs, go to [https://alphafoldserver.com/](https://alphafoldserver.com/) and sign-in with a gmail account and agree to any necessary terms.
 
