@@ -52,7 +52,7 @@ The first step is detailed below. The second step for running AF3 can be found i
 # enFoldX Tutorial
 
 ## Step 0: Tutorial data
-For this tutorial, we will be analyzing two TCRs from [this paper](https://pubmed.ncbi.nlm.nih.gov/37490916/), MEL8 and MEL5, together with 9 peptides (3 cognates, 6 non-cognates). See the paper for details. We downloaded the VDJ calls and peptides and copied them to `examples/MEL_data/`.
+For this tutorial, we will be analyzing two TCRs from Dolton et. al.[^1], MEL8 and MEL5, together with 9 peptides (3 cognates, 6 non-cognates). See the paper for details. We downloaded the VDJ calls and peptides and copied them to `examples/MEL_data/`.
 
 If you want to see what the results look like at each step of the pipeline, please download the tutorial data from [here](https://github.com/jonlevi/enFoldX/releases/download/v0.1.0/enfoldx_tutorial_data.zip). 
 
@@ -160,3 +160,4 @@ python ./scripts/compute_pairwise_rmsd.py -d examples/af3_fold_outputs/mel8_mrp3
 ```
 You can look at sample output in ```examples/pairwise_rmsd_example/pairwise_rmsd.csv```. Note, this script can be sped up by allocating additional cores, as mdtraj can make use of parallelization under the hood, as explained [here](https://mdtraj.readthedocs.io/en/latest/api/generated/mdtraj.rmsd.html#mdtraj.rmsd) 
 
+[^1]: Dolton G, Rius C, Wall A, Szomolay B, Bianchi V, Galloway SAE, Hasan MS, Morin T, Caillaud ME, Thomas HL, Theaker S, Tan LR, Fuller A, Topley K, Legut M, Attaf M, Hopkins JR, Behiry E, Zabkiewicz J, Alvares C, Lloyd A, Rogers A, Henley P, Fegan C, Ottmann O, Man S, Crowther MD, Donia M, Svane IM, Cole DK, Brown PE, Rizkallah P, Sewell AK. Targeting of multiple tumor-associated antigens by individual T cell receptors during successful cancer immunotherapy. Cell. 2023 Aug 3;186(16):3333-3349.e27. doi: 10.1016/j.cell.2023.06.020. Epub 2023 Jul 24. PMID: 37490916.
