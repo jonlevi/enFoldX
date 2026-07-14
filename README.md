@@ -124,7 +124,7 @@ python ./scripts/get_cognate_prediction.py -f examples/enfoldx_extracted_feature
 ```
 and the results are written to ```examples/enfoldx_predictions/enFoldX_predictions.csv```. Here is what the results should look like for the MEL TCRs:
 
-![MEL TCRs](https://github.com/jonlevi/enFoldX/blob/main/examples/enfoldx_predictions/mel_prediction_boxplots.png) 
+![MEL TCRs](examples/enfoldx_predictions/mel_prediction_boxplots.png) 
 
 As with any supervised machine learning approach, model performance depends on the quality and relevance of the training data. If your target dataset differs substantially from published datasets such as VDJdb, we recommend first running the enFoldX pipeline to generate structural ensemble features, then training your own classifier on a labeled dataset that closely matches your intended application before applying it to new data.
 
