@@ -38,4 +38,4 @@ This is a L2-regularized logistic regression enFoldX model trained on VDJdb Mous
 ## Model 4: enFoldX_human_vFebSept_DecoyPerm_1seed
 
 **Description:**  
-This is a L2-regularized logistic regression enFoldX model trained on VDJdb Human data (09/2025 and 02/2025 releases, records with VDJdb score 1+), with Decoy and Permuted negatives, with features extracted from AF3 samples for just 1 seed. It does slightly worse than the 10-seed models (above) when used on test sets with 10-seed-based features, but if you only ran enFoldX pipeline with 1 seed (for example, using AlphaFold server) and so only have features for 1 seed (ensembled across 5 samples), please use this model.
+This is a L2-regularized logistic regression enFoldX model trained on VDJdb Human data (09/2025 and 02/2025 releases, records with VDJdb score 1+), with Decoy and Permuted negatives, with features extracted from AF3 samples for just 1 seed. It does slightly worse than the 10-seed models (above) when used on test sets with 10-seed-based features, but if you only ran enFoldX pipeline with 1 seed and so only have features for 1 seed (ensembled across 5 samples), please use this model.
