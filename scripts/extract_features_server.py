@@ -127,7 +127,8 @@ def parse_af3_results(
                     )
                     results[f"min_plddt_{chain_mapper.get(chain1)}"] = np.min(sub_plddt)
                     results[f"max_plddt_{chain_mapper.get(chain1)}"] = np.max(sub_plddt)
-                    results[f"std_plddt_{chain_mapper.get(chain1)}"] = np.std(sub_plddt)
+                    # The following line is a bug (max instead of std) but needs to be fixed in pre-trained models before it can be fixed here
+                    results[f"std_plddt_{chain_mapper.get(chain1)}"] = np.max(sub_plddt)
 
         # CDR3 Metrics
         residues_alpha = [
@@ -227,7 +228,7 @@ def main(args):
             seq_df[col].notna().all() and (seq_df[col] != "").all()
         ), f"{col} contains missing values"
 
-    assert os.path.exists(args.zip_file), f"{rgs.zip_file} not found"
+    assert os.path.exists(args.zip_file), f"{args.zip_file} not found"
 
     samples = [
         0,
