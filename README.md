@@ -17,7 +17,14 @@ By using enFoldX, you are agreeing to the terms set in the enFoldX [Terms of Use
 ## Issues / Contact
 If you have any issues running enFoldX or any questions about the code or the method, please file an issue on the repository or [reach out directly via email](mailto:levinej4@mskcc.org).
 
-## Installation
+## Requirements
+To install and run enFoldX and AlphaFold3, you will need:
+- python (conda or pip preferred for dependencies)
+- docker or singularity (to run the AF3 container)
+- ~1TB of space (for AF3 databases)
+- A GPU that can run AF3 (see [https://github.com/google-deepmind/alphafold3/]([https://github.com/google-deepmind/alphafold3/]))
+
+## enFoldX Installation
 Clone the repository:
 
 ```bash
