@@ -118,7 +118,7 @@ options:
                         Filename for output CSV file with enFoldX scores. (default: enFoldX_predictions.csv)
 ```
 
-For the MEL TCRs, this scrip would be called like this, using the default human model:
+For the MEL TCRs, this script would be called like this, using the default human model:
 ```
 python ./scripts/get_cognate_prediction.py -f examples/enfoldx_extracted_features/ensemble_features.csv -m human -o examples/enfoldx_predictions/ 
 ```
