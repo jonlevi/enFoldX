@@ -118,13 +118,13 @@ options:
                         Filename for output CSV file with enFoldX scores. (default: enFoldX_predictions.csv)
 ```
 
-For the MEL TCRs, this scrip would be called like this, using the decoy human model:
+For the MEL TCRs, this script would be called like this, using the default human model:
 ```
-python ./scripts/get_cognate_prediction.py -f examples/enfoldx_extracted_features/ensemble_features.csv -m human_decoy -o examples/enfoldx_predictions/ 
+python ./scripts/get_cognate_prediction.py -f examples/enfoldx_extracted_features/ensemble_features.csv -m human -o examples/enfoldx_predictions/ 
 ```
 and the results are written to ```examples/enfoldx_predictions/enFoldX_predictions.csv```. Here is what the results should look like for the MEL TCRs:
 
-![MEL TCRs](examples/enfoldx_predictions/mel_boxplots.png) 
+![MEL TCRs](examples/enfoldx_predictions/mel_prediction_boxplot.png) 
 
 As with any supervised machine learning approach, model performance depends on the quality and relevance of the training data. If your target dataset differs substantially from published datasets such as VDJdb, we recommend first running the enFoldX pipeline to generate structural ensemble features, then training your own classifier on a labeled dataset that closely matches your intended application before applying it to new data.
 

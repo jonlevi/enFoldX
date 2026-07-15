@@ -107,8 +107,7 @@ def parse_af3_results(
                     results[f"avg_plddt_{chain1}"] = np.mean(sub_plddt)
                     results[f"min_plddt_{chain1}"] = np.min(sub_plddt)
                     results[f"max_plddt_{chain1}"] = np.max(sub_plddt)
-                    # The following line is a bug (max instead of std) but needs to be fixed in pre-trained models before it can be fixed here
-                    results[f"std_plddt_{chain1}"] = np.max(sub_plddt)
+                    results[f"std_plddt_{chain1}"] = np.std(sub_plddt)
 
         # CDR3 Metrics
         residues_alpha = [int(idx) for idx in np.where(residue_chain_ids == "A")[0]]
