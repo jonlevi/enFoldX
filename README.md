@@ -1,7 +1,7 @@
 # enFoldX: Leveraging ensembles of in silico structures for complex binding prediction
 
 
-enFoldX (**En**semble of **Fold**ed Comple**X**es) enables the binding prediction of large datasets of input sequences by extracting distributions of high dimensional confidence features from ensembles of predicted structures. See [our preprint](https://www.biorxiv.org/content/10.64898/2026.07.14.738340v1.article-info) for more details!
+enFoldX (**En**semble of **Fold**ed Comple**X**es) enables the binding prediction of large datasets of input sequences by extracting distributions of high dimensional confidence features from ensembles of predicted structures. See [our preprint](https://www.biorxiv.org/content/10.64898/2026.07.14.738340v1.full) for more details!
 
 This repo provides code for a pipeline to run enFoldX. This implementation of enFoldX uses AlphaFold3 and runs predictions for complex binding for TCR-peptide-MHC complexes (for class I MHC).
 
