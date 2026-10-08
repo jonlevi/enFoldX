@@ -173,44 +173,57 @@ def parse_af3_results(
                 sub_contact_probs_b_chain
             )
 
-        # Region-specific epitope metrics
-        residues_peptide = [int(idx) for idx in np.where(residue_chain_ids == "P")[0]]
-        peptide_residues_dict = {
-            "peptide_nterminus": residues_peptide[:3],
-            "peptide_cterminus": residues_peptide[-3:],
+        # Sub-peptide metrics
+        peptide_residues = [int(idx) for idx in np.where(residue_chain_ids == "P")[0]]
+        subpeptide_residues_dict = {
+            "peptide_nterm": residues_peptide[:3], 
+            "peptide_cterm": residues_peptide[-3:],
             "peptide_middle": residues_peptide[3:-3],
         }
         cdr3_residues_dict = {"cdr3a": residues_alpha_cdr3, "cdr3b": residues_beta_cdr3}
 
-        for peptide_name, peptide_residues in peptide_residues_dict.items():
+        for subpeptide_name, subpeptide_residues in subpeptide_residues_dict.items():
             for cdr3_name, cdr3_residues in cdr3_residues_dict.items():
 
-                sub_pae_peptide_cdr3 = pae[
-                    peptide_residues[0] : peptide_residues[-1] + 1,
+                sub_pae_subpeptide_cdr3 = pae[
+                    subpeptide_residues[0] : subpeptide_residues[-1] + 1,
                     cdr3_residues[0] : cdr3_residues[-1] + 1,
                 ]
 
-                sub_pae_cdr3_peptide = pae[
+                sub_pae_cdr3_subpeptide = pae[
                     cdr3_residues[0] : cdr3_residues[-1] + 1,
-                    peptide_residues[0] : peptide_residues[-1] + 1,
+                    subpeptide_residues[0] : subpeptide_residues[-1] + 1,
                 ]
 
                 pae_submatrix = np.concatenate(
-                    (sub_pae_peptide_cdr3, sub_pae_cdr3_peptide), axis=None
+                    (sub_pae_subpeptide_cdr3, sub_pae_cdr3_subpeptide), axis=None
                 )
 
-                results[f"avg_pae_interaction_{cdr3_name}_{peptide_name}"] = np.mean(
+                results[f"avg_pae_interaction_{cdr3_name}_{subpeptide_name}"] = np.mean(
                     pae_submatrix
                 )
-                results[f"min_pae_interaction_{cdr3_name}_{peptide_name}"] = np.min(
+                results[f"min_pae_interaction_{cdr3_name}_{subpeptide_name}"] = np.min(
                     pae_submatrix
                 )
-                results[f"max_pae_interaction_{cdr3_name}_{peptide_name}"] = np.max(
+                results[f"max_pae_interaction_{cdr3_name}_{subpeptide_name}"] = np.max(
                     pae_submatrix
                 )
-                results[f"std_pae_interaction_{cdr3_name}_{peptide_name}"] = np.std(
+                results[f"std_pae_interaction_{cdr3_name}_{subpeptide_name}"] = np.std(
                     pae_submatrix
                 )
+
+                sub_contact_probs_cdr3_subpeptide = contact_probs[
+                    cdr3_residues[0] : cdr3_residues[-1] + 1,
+                    subpeptide_residues[0] : subpeptide_residues[-1] + 1,
+                ]
+
+                results[f"avg_contact_probs_{cdr3_name}_{subpeptide_name}"] = np.mean(
+                    sub_contact_probs_cdr3_subpeptide
+                )
+                results[f"max_contact_probs_{cdr3_name}_{subpeptide_name}"] = np.max(
+                    sub_contact_probs_cdr3_subpeptide
+                )
+                
 
     return results
 
