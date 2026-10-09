@@ -15,215 +15,249 @@ def find_cdr_index(full_chain_seq, cdr3_seq):
     return full_chain_seq.find(cdr3_seq)
 
 
-def parse_af3_results(
-    summary_json_path,
-    confidences_json_path,
-    a_cdr3_start,
-    a_cdr3_end,
-    b_cdr3_start,
-    b_cdr3_end,
-):
+def map_res_to_atoms(chain_seq):
+    """Given protein sequence, return list of tuples (res_id, [atom_idxs])
+
+    Length of list is equal to number of residues in chain_seq.
+    Each tuple contains
+        - residue ID (str) : one-letter amino acid code
+        - residue index (int) : index of residue in chain_seq
+        - list of atom indices (list of int) : indices of heavy atoms in chain_seq
+    """
+
+    heavy_atoms_per_res = {
+        "G": 4,
+        "A": 5,
+        "S": 6,
+        "C": 6,
+        "V": 7,
+        "T": 7,
+        "P": 7,
+        "I": 8,
+        "L": 8,
+        "M": 8,
+        "N": 8,
+        "D": 8,
+        "Q": 9,
+        "E": 9,
+        "K": 9,
+        "H": 10,
+        "F": 11,
+        "R": 11,
+        "Y": 12,
+        "W": 14,
+    }
+    atom_idx, atom_res_ids = 0, []
+    for res in list(chain_seq):
+        atom_res_ids.append(list(range(atom_idx, atom_idx + heavy_atoms_per_res[res])))
+        atom_idx += heavy_atoms_per_res[res]
+
+    atom_res_ids[-1].append(atom_res_ids[-1][-1] + 1)
+    zipped_map = tuple(zip(list(chain_seq), list(range(len(chain_seq))), atom_res_ids))
+
+    return zipped_map
+
+
+def parse_af3_results(summary_json_path, confidences_json_path, mapped_atom_res_dict):
 
     chains = ["A", "B", "M", "P"]
 
     results = {}
+
+    # Loading summary_confidences.json and confidences.json files
     with open(summary_json_path, "r") as jfile1:
         summary_confidence = json.load(jfile1)
-        results["ptm"] = summary_confidence["ptm"]
-        results["iptm"] = summary_confidence["iptm"]
-        chain_pair_iptm = summary_confidence["chain_pair_iptm"]
-        chain_ptm = summary_confidence["chain_ptm"]
-        for i, chain1 in enumerate(chains):
-            results[f"chain_ptm_{chain1}"] = chain_ptm[i]
-            for j, chain2 in enumerate(chains):
-                if chain1 < chain2:
-                    results[f"chain_pair_iptm_{chain1}_{chain2}"] = chain_pair_iptm[i][
-                        j
-                    ]
 
     with open(confidences_json_path, "r") as jfile2:
         confidence = json.load(jfile2)
-        plddt = np.array(confidence["atom_plddts"])
-        results["avg_plddt"] = np.mean(plddt)
-        pae = np.array(confidence["pae"])
-        residue_chain_ids = np.array(confidence["token_chain_ids"])
-        atom_chain_ids = np.array(confidence["atom_chain_ids"])
-        results["avg_pae"] = np.mean(pae)
-        contact_probs = np.array(confidence["contact_probs"])
-        for i, chain1 in enumerate(chains):
-            for j, chain2 in enumerate(chains):
-                if i < j:
-                    residues_1 = [
-                        int(idx) for idx in np.where(residue_chain_ids == chain1)[0]
-                    ]
-                    residues_2 = [
-                        int(idx) for idx in np.where(residue_chain_ids == chain2)[0]
-                    ]
-                    sub_pae1 = pae[
-                        residues_1[0] : residues_1[-1] + 1,
-                        residues_2[0] : residues_2[-1] + 1,
-                    ]
-                    sub_pae2 = pae[
-                        residues_2[0] : residues_2[-1] + 1,
-                        residues_1[0] : residues_1[-1] + 1,
-                    ]
-                    pae_submatrix = np.concatenate((sub_pae1, sub_pae2), axis=None)
-                    results[f"avg_pae_interaction_{chain1}_{chain2}"] = np.mean(
-                        pae_submatrix
-                    )
-                    results[f"min_pae_interaction_{chain1}_{chain2}"] = np.min(
-                        pae_submatrix
-                    )
-                    results[f"max_pae_interaction_{chain1}_{chain2}"] = np.max(
-                        pae_submatrix
-                    )
-                    results[f"std_pae_interaction_{chain1}_{chain2}"] = np.std(
-                        pae_submatrix
-                    )
-                    sub_contact_probs = contact_probs[
-                        residues_1[0] : residues_1[-1] + 1,
-                        residues_2[0] : residues_2[-1] + 1,
-                    ]
-                    results[f"avg_contact_probs_{chain1}_{chain2}"] = np.mean(
-                        sub_contact_probs
-                    )
-                    results[f"max_contact_probs_{chain1}_{chain2}"] = np.max(
-                        sub_contact_probs
-                    )
-                elif i == j:
-                    residues = [
-                        int(idx) for idx in np.where(residue_chain_ids == chain1)[0]
-                    ]
-                    sub_pae = pae[
-                        residues[0] : residues[-1] + 1, residues[0] : residues[-1] + 1
-                    ]
-                    results[f"avg_pae_{chain1}"] = np.mean(sub_pae)
-                    results[f"min_pae_{chain1}"] = np.min(sub_pae)
-                    results[f"max_pae_{chain1}"] = np.max(sub_pae)
-                    results[f"std_pae_{chain1}"] = np.std(sub_pae)
 
-                    atoms = [int(idx) for idx in np.where(atom_chain_ids == chain1)[0]]
-                    sub_plddt = plddt[atoms[0] : atoms[-1] + 1]
-                    results[f"avg_plddt_{chain1}"] = np.mean(sub_plddt)
-                    results[f"min_plddt_{chain1}"] = np.min(sub_plddt)
-                    results[f"max_plddt_{chain1}"] = np.max(sub_plddt)
-                    results[f"std_plddt_{chain1}"] = np.std(sub_plddt)
+    results["ptm"] = summary_confidence["ptm"]
+    results["iptm"] = summary_confidence["iptm"]
+    chain_pair_iptm = summary_confidence["chain_pair_iptm"]
+    chain_ptm = summary_confidence["chain_ptm"]
+    for i, chain1 in enumerate(chains):
+        results[f"chain_ptm_{chain1}"] = chain_ptm[i]
+        for j, chain2 in enumerate(chains):
+            if chain1 < chain2:
+                results[f"chain_pair_iptm_{chain1}_{chain2}"] = chain_pair_iptm[i][j]
 
-        # CDR3 Metrics
-        residues_alpha = [int(idx) for idx in np.where(residue_chain_ids == "A")[0]]
-        residues_beta = [int(idx) for idx in np.where(residue_chain_ids == "B")[0]]
-        residues_alpha_cdr3 = residues_alpha[a_cdr3_start:a_cdr3_end]
-        residues_beta_cdr3 = residues_beta[b_cdr3_start:b_cdr3_end]
-        for k, chain3 in enumerate(["M", "P"]):
+    plddt = np.array(confidence["atom_plddts"])
+    results["avg_plddt"] = np.mean(plddt)
+    pae = np.array(confidence["pae"])
+    residue_chain_ids = np.array(confidence["token_chain_ids"])
+    atom_chain_ids = np.array(confidence["atom_chain_ids"])
+    results["avg_pae"] = np.mean(pae)
+    contact_probs = np.array(confidence["contact_probs"])
 
-            residues_3 = [int(idx) for idx in np.where(residue_chain_ids == chain3)[0]]
-
-            sub_pae_a_chain = pae[
-                residues_alpha_cdr3[0] : residues_alpha_cdr3[-1] + 1,
-                residues_3[0] : residues_3[-1] + 1,
-            ]
-            sub_pae_chain_a = pae[
-                residues_3[0] : residues_3[-1] + 1,
-                residues_alpha_cdr3[0] : residues_alpha_cdr3[-1] + 1,
-            ]
-            pae_submatrix_a = np.concatenate(
-                (sub_pae_a_chain, sub_pae_chain_a), axis=None
-            )
-
-            results[f"avg_pae_interaction_cdr3a_{chain3}"] = np.mean(pae_submatrix_a)
-            results[f"min_pae_interaction_cdr3a_{chain3}"] = np.min(pae_submatrix_a)
-            results[f"max_pae_interaction_cdr3a_{chain3}"] = np.max(pae_submatrix_a)
-            results[f"std_pae_interaction_cdr3a_{chain3}"] = np.std(pae_submatrix_a)
-
-            sub_pae_b_chain = pae[
-                residues_beta_cdr3[0] : residues_beta_cdr3[-1] + 1,
-                residues_3[0] : residues_3[-1] + 1,
-            ]
-            sub_pae_chain_b = pae[
-                residues_3[0] : residues_3[-1] + 1,
-                residues_beta_cdr3[0] : residues_beta_cdr3[-1] + 1,
-            ]
-            pae_submatrix_b = np.concatenate(
-                (sub_pae_b_chain, sub_pae_chain_b), axis=None
-            )
-            results[f"avg_pae_interaction_cdr3b_{chain3}"] = np.mean(pae_submatrix_b)
-            results[f"min_pae_interaction_cdr3b_{chain3}"] = np.min(pae_submatrix_b)
-            results[f"max_pae_interaction_cdr3b_{chain3}"] = np.max(pae_submatrix_b)
-            results[f"std_pae_interaction_cdr3b_{chain3}"] = np.std(pae_submatrix_b)
-
-            sub_contact_probs_a_chain = contact_probs[
-                residues_alpha_cdr3[0] : residues_alpha_cdr3[-1] + 1,
-                residues_3[0] : residues_3[-1] + 1,
-            ]
-            results[f"avg_contact_probs_cdr3a_{chain3}"] = np.mean(
-                sub_contact_probs_a_chain
-            )
-            results[f"max_contact_probs_cdr3a_{chain3}"] = np.max(
-                sub_contact_probs_a_chain
-            )
-
-            sub_contact_probs_b_chain = contact_probs[
-                residues_beta_cdr3[0] : residues_beta_cdr3[-1] + 1,
-                residues_3[0] : residues_3[-1] + 1,
-            ]
-            results[f"avg_contact_probs_cdr3b_{chain3}"] = np.mean(
-                sub_contact_probs_b_chain
-            )
-            results[f"max_contact_probs_cdr3b_{chain3}"] = np.max(
-                sub_contact_probs_b_chain
-            )
-
-        # Sub-peptide metrics
-        peptide_residues = [int(idx) for idx in np.where(residue_chain_ids == "P")[0]]
-        subpeptide_residues_dict = {
-            "peptide_nterm": residues_peptide[:3], 
-            "peptide_cterm": residues_peptide[-3:],
-            "peptide_middle": residues_peptide[3:-3],
-        }
-        cdr3_residues_dict = {"cdr3a": residues_alpha_cdr3, "cdr3b": residues_beta_cdr3}
-
-        for subpeptide_name, subpeptide_residues in subpeptide_residues_dict.items():
-            for cdr3_name, cdr3_residues in cdr3_residues_dict.items():
-
-                sub_pae_subpeptide_cdr3 = pae[
-                    subpeptide_residues[0] : subpeptide_residues[-1] + 1,
-                    cdr3_residues[0] : cdr3_residues[-1] + 1,
+    for i, chain1 in enumerate(chains):
+        for j, chain2 in enumerate(chains):
+            if i < j:
+                residues_1 = [
+                    int(idx) for idx in np.where(residue_chain_ids == chain1)[0]
                 ]
-
-                sub_pae_cdr3_subpeptide = pae[
-                    cdr3_residues[0] : cdr3_residues[-1] + 1,
-                    subpeptide_residues[0] : subpeptide_residues[-1] + 1,
+                residues_2 = [
+                    int(idx) for idx in np.where(residue_chain_ids == chain2)[0]
                 ]
-
-                pae_submatrix = np.concatenate(
-                    (sub_pae_subpeptide_cdr3, sub_pae_cdr3_subpeptide), axis=None
-                )
-
-                results[f"avg_pae_interaction_{cdr3_name}_{subpeptide_name}"] = np.mean(
-                    pae_submatrix
-                )
-                results[f"min_pae_interaction_{cdr3_name}_{subpeptide_name}"] = np.min(
-                    pae_submatrix
-                )
-                results[f"max_pae_interaction_{cdr3_name}_{subpeptide_name}"] = np.max(
-                    pae_submatrix
-                )
-                results[f"std_pae_interaction_{cdr3_name}_{subpeptide_name}"] = np.std(
-                    pae_submatrix
-                )
-
-                sub_contact_probs_cdr3_subpeptide = contact_probs[
-                    cdr3_residues[0] : cdr3_residues[-1] + 1,
-                    subpeptide_residues[0] : subpeptide_residues[-1] + 1,
+                sub_pae1 = pae[
+                    residues_1[0] : residues_1[-1] + 1,
+                    residues_2[0] : residues_2[-1] + 1,
                 ]
+                sub_pae2 = pae[
+                    residues_2[0] : residues_2[-1] + 1,
+                    residues_1[0] : residues_1[-1] + 1,
+                ]
+                pae_submatrix = np.concatenate((sub_pae1, sub_pae2), axis=None)
+                results[f"avg_pae_interaction_{chain1}_{chain2}"] = np.mean(
+                    pae_submatrix
+                )
+                results[f"min_pae_interaction_{chain1}_{chain2}"] = np.min(
+                    pae_submatrix
+                )
+                results[f"max_pae_interaction_{chain1}_{chain2}"] = np.max(
+                    pae_submatrix
+                )
+                results[f"std_pae_interaction_{chain1}_{chain2}"] = np.std(
+                    pae_submatrix
+                )
+                sub_contact_probs = contact_probs[
+                    residues_1[0] : residues_1[-1] + 1,
+                    residues_2[0] : residues_2[-1] + 1,
+                ]
+                results[f"avg_contact_probs_{chain1}_{chain2}"] = np.mean(
+                    sub_contact_probs
+                )
+                results[f"max_contact_probs_{chain1}_{chain2}"] = np.max(
+                    sub_contact_probs
+                )
+            elif i == j:
+                residues = [
+                    int(idx) for idx in np.where(residue_chain_ids == chain1)[0]
+                ]
+                sub_pae = pae[
+                    residues[0] : residues[-1] + 1, residues[0] : residues[-1] + 1
+                ]
+                results[f"avg_pae_{chain1}"] = np.mean(sub_pae)
+                results[f"min_pae_{chain1}"] = np.min(sub_pae)
+                results[f"max_pae_{chain1}"] = np.max(sub_pae)
+                results[f"std_pae_{chain1}"] = np.std(sub_pae)
 
-                results[f"avg_contact_probs_{cdr3_name}_{subpeptide_name}"] = np.mean(
-                    sub_contact_probs_cdr3_subpeptide
-                )
-                results[f"max_contact_probs_{cdr3_name}_{subpeptide_name}"] = np.max(
-                    sub_contact_probs_cdr3_subpeptide
-                )
-                
+                atoms = [int(idx) for idx in np.where(atom_chain_ids == chain1)[0]]
+                sub_plddt = plddt[atoms[0] : atoms[-1] + 1]
+                results[f"avg_plddt_{chain1}"] = np.mean(sub_plddt)
+                results[f"min_plddt_{chain1}"] = np.min(sub_plddt)
+                results[f"max_plddt_{chain1}"] = np.max(sub_plddt)
+                results[f"std_plddt_{chain1}"] = np.std(sub_plddt)
+
+    # CDR3 Metrics
+    residues_alpha = [int(idx) for idx in np.where(residue_chain_ids == "A")[0]]
+    residues_beta = [int(idx) for idx in np.where(residue_chain_ids == "B")[0]]
+    residues_alpha_cdr3 = residues_alpha[a_cdr3_start:a_cdr3_end]
+    residues_beta_cdr3 = residues_beta[b_cdr3_start:b_cdr3_end]
+    for k, chain3 in enumerate(["M", "P"]):
+
+        residues_3 = [int(idx) for idx in np.where(residue_chain_ids == chain3)[0]]
+
+        sub_pae_a_chain = pae[
+            residues_alpha_cdr3[0] : residues_alpha_cdr3[-1] + 1,
+            residues_3[0] : residues_3[-1] + 1,
+        ]
+        sub_pae_chain_a = pae[
+            residues_3[0] : residues_3[-1] + 1,
+            residues_alpha_cdr3[0] : residues_alpha_cdr3[-1] + 1,
+        ]
+        pae_submatrix_a = np.concatenate((sub_pae_a_chain, sub_pae_chain_a), axis=None)
+
+        results[f"avg_pae_interaction_cdr3a_{chain3}"] = np.mean(pae_submatrix_a)
+        results[f"min_pae_interaction_cdr3a_{chain3}"] = np.min(pae_submatrix_a)
+        results[f"max_pae_interaction_cdr3a_{chain3}"] = np.max(pae_submatrix_a)
+        results[f"std_pae_interaction_cdr3a_{chain3}"] = np.std(pae_submatrix_a)
+
+        sub_pae_b_chain = pae[
+            residues_beta_cdr3[0] : residues_beta_cdr3[-1] + 1,
+            residues_3[0] : residues_3[-1] + 1,
+        ]
+        sub_pae_chain_b = pae[
+            residues_3[0] : residues_3[-1] + 1,
+            residues_beta_cdr3[0] : residues_beta_cdr3[-1] + 1,
+        ]
+        pae_submatrix_b = np.concatenate((sub_pae_b_chain, sub_pae_chain_b), axis=None)
+        results[f"avg_pae_interaction_cdr3b_{chain3}"] = np.mean(pae_submatrix_b)
+        results[f"min_pae_interaction_cdr3b_{chain3}"] = np.min(pae_submatrix_b)
+        results[f"max_pae_interaction_cdr3b_{chain3}"] = np.max(pae_submatrix_b)
+        results[f"std_pae_interaction_cdr3b_{chain3}"] = np.std(pae_submatrix_b)
+
+        sub_contact_probs_a_chain = contact_probs[
+            residues_alpha_cdr3[0] : residues_alpha_cdr3[-1] + 1,
+            residues_3[0] : residues_3[-1] + 1,
+        ]
+        results[f"avg_contact_probs_cdr3a_{chain3}"] = np.mean(
+            sub_contact_probs_a_chain
+        )
+        results[f"max_contact_probs_cdr3a_{chain3}"] = np.max(sub_contact_probs_a_chain)
+
+        sub_contact_probs_b_chain = contact_probs[
+            residues_beta_cdr3[0] : residues_beta_cdr3[-1] + 1,
+            residues_3[0] : residues_3[-1] + 1,
+        ]
+        results[f"avg_contact_probs_cdr3b_{chain3}"] = np.mean(
+            sub_contact_probs_b_chain
+        )
+        results[f"max_contact_probs_cdr3b_{chain3}"] = np.max(sub_contact_probs_b_chain)
+
+    # Sub-peptide metrics
+    peptide_residues = [int(idx) for idx in np.where(residue_chain_ids == "P")[0]]
+    subpeptide_residues_dict = {
+        "peptide_nterm": residues_peptide[
+            :3
+        ],  # first three residues for N-terminal side
+        "peptide_cterm": residues_peptide[
+            -3:
+        ],  # last three residues for C-terminal side
+        "peptide_middle": residues_peptide[3:-3],  # middle residues
+    }
+    cdr3_residues_dict = {"cdr3a": residues_alpha_cdr3, "cdr3b": residues_beta_cdr3}
+
+    for subpeptide_name, subpeptide_residues in subpeptide_residues_dict.items():
+        for cdr3_name, cdr3_residues in cdr3_residues_dict.items():
+
+            sub_pae_subpeptide_cdr3 = pae[
+                subpeptide_residues[0] : subpeptide_residues[-1] + 1,
+                cdr3_residues[0] : cdr3_residues[-1] + 1,
+            ]
+
+            sub_pae_cdr3_subpeptide = pae[
+                cdr3_residues[0] : cdr3_residues[-1] + 1,
+                subpeptide_residues[0] : subpeptide_residues[-1] + 1,
+            ]
+
+            pae_submatrix = np.concatenate(
+                (sub_pae_subpeptide_cdr3, sub_pae_cdr3_subpeptide), axis=None
+            )
+
+            results[f"avg_pae_interaction_{cdr3_name}_{subpeptide_name}"] = np.mean(
+                pae_submatrix
+            )
+            results[f"min_pae_interaction_{cdr3_name}_{subpeptide_name}"] = np.min(
+                pae_submatrix
+            )
+            results[f"max_pae_interaction_{cdr3_name}_{subpeptide_name}"] = np.max(
+                pae_submatrix
+            )
+            results[f"std_pae_interaction_{cdr3_name}_{subpeptide_name}"] = np.std(
+                pae_submatrix
+            )
+
+            sub_contact_probs_cdr3_subpeptide = contact_probs[
+                cdr3_residues[0] : cdr3_residues[-1] + 1,
+                subpeptide_residues[0] : subpeptide_residues[-1] + 1,
+            ]
+
+            results[f"avg_contact_probs_{cdr3_name}_{subpeptide_name}"] = np.mean(
+                sub_contact_probs_cdr3_subpeptide
+            )
+            results[f"max_contact_probs_{cdr3_name}_{subpeptide_name}"] = np.max(
+                sub_contact_probs_cdr3_subpeptide
+            )
 
     return results
 
@@ -271,6 +305,8 @@ def main(args):
         4,
     ]
 
+    chains = ["A", "B", "M", "P"]
+
     # Write the files
     rows = []
     for i, (idx, row) in tqdm.tqdm(enumerate(seq_df.iterrows())):
@@ -284,16 +320,27 @@ def main(args):
         ranking = f"{path}/ranking_scores.csv"
         ranking_df = pd.read_csv(ranking, header=0)
 
-        TRA = row[args.alpha_col]
-        cdr3a = row[args.cdr3alpha_col]
-        TRB = row[args.beta_col]
-        cdr3b = row[args.cdr3beta_col]
+        sequences = {
+            "A": row[args.alpha_col],
+            "B": row[args.beta_col],
+            "M": row[args.mhc_col],
+            "P": row[args.peptide_col],
+            "CDR3a": row[args.cdr3alpha_col],
+            "CDR3b": row[args.cdr3beta_col],
+        }
 
-        a_cdr3_start = find_cdr_index(TRA, cdr3a)
-        a_cdr3_end = a_cdr3_start + len(cdr3a)
+        a_cdr3_start = find_cdr_index(sequences["A"], sequences["CDR3a"])
+        a_cdr3_end = a_cdr3_start + len(sequences["CDR3a"])
 
-        b_cdr3_start = find_cdr_index(TRB, cdr3b)
-        b_cdr3_end = b_cdr3_start + len(cdr3b)
+        b_cdr3_start = find_cdr_index(sequences["B"], sequences["CDR3b"])
+        b_cdr3_end = b_cdr3_start + len(sequences["CDR3b"])
+
+        mapped_atoms_res = {}
+        for chain in chains:
+            mapped_atoms_res[chain] = map_res_to_atoms(sequences[chain])
+
+        mapped_atoms_res["CDR3a"] = mapped_atoms_res["A"][a_cdr3_start:a_cdr3_end]
+        mapped_atoms_res["CDR3b"] = mapped_atoms_res["B"][b_cdr3_start:b_cdr3_end]
 
         for seed in model_seeds:
             for sample in samples:
@@ -309,12 +356,7 @@ def main(args):
                     f"{path}/seed-{seed}_sample-{sample}/confidences.json"
                 )
                 sub_results = parse_af3_results(
-                    summary_path,
-                    confidences_path,
-                    a_cdr3_start,
-                    a_cdr3_end,
-                    b_cdr3_start,
-                    b_cdr3_end,
+                    summary_path, confidences_path, mapped_atoms_res
                 )
                 new_row.update(sub_results)
                 ranking = ranking_df[
