@@ -254,8 +254,6 @@ def parse_af3_results(summary_json_path, confidences_json_path, mapped_atom_res_
     results[f"std_plddt_cdr3b"] = np.std(plddt_beta_cdr3)
 
     # Sub-peptide metrics
-    peptide_residues = [int(idx) for idx in np.where(residue_chain_ids == "P")[0]]
-    peptide_atoms = [int(idx) for idx in np.where(atom_chain_ids == "P")[0]]
 
     subpeptide_mapped_dict = {
         # first three residues for N-terminal side
@@ -266,6 +264,9 @@ def parse_af3_results(summary_json_path, confidences_json_path, mapped_atom_res_
         "peptide_middle": mapped_atom_res_dict["P"][3:-3],
     }
     cdr3_residues_dict = {"cdr3a": residues_alpha_cdr3, "cdr3b": residues_beta_cdr3}
+
+    peptide_residues = [int(idx) for idx in np.where(residue_chain_ids == "P")[0]]
+    peptide_atoms = [int(idx) for idx in np.where(atom_chain_ids == "P")[0]]
 
     for subpeptide_name, subpeptide_mapped in subpeptide_mapped_dict.items():
 
