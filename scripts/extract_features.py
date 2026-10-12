@@ -5,6 +5,9 @@ import os
 import argparse
 import numpy as np
 import re
+from collections import namedtuple
+
+ResidueAtomMap = namedtuple("ResidueAtomMap", ["res_name", "res_idx", "atom_idxs"])
 
 
 def find_cdr_index(full_chain_seq, cdr3_seq):
@@ -16,13 +19,13 @@ def find_cdr_index(full_chain_seq, cdr3_seq):
 
 
 def map_res_to_atoms(chain_seq):
-    """Given protein sequence, return list of tuples (res_id, res_idx, [atom_idxs])
+    """Given protein sequence, return list of ResidueAtomMap tuples (res_name, res_idx, [atom_idxs])
 
     Length of list is equal to number of residues in chain_seq.
     Each tuple contains
-        - residue ID (str) : one-letter amino acid code
-        - residue idx (int) : index of residue in chain_seq
-        - list of atom idx (list of int) : indices of heavy atoms in chain_seq
+        - res_name (str) : one-letter amino acid code
+        - res_idx (int) : index of residue in chain_seq
+        - atom_idxs (list of int) : indices of heavy atoms in chain_seq
 
     Ex: [('M', 1, [0, 1, 2, 3, 4, 5, 6, 7]), ('A', 2, [8, 9, 10, 11, 12]), ...]
     """
@@ -54,10 +57,18 @@ def map_res_to_atoms(chain_seq):
         atom_res_ids.append(list(range(atom_idx, atom_idx + heavy_atoms_per_res[res])))
         atom_idx += heavy_atoms_per_res[res]
 
+    # Add extra atom for terminal residue oxygen atom
     atom_res_ids[-1].append(atom_res_ids[-1][-1] + 1)
-    zipped_map = tuple(zip(list(chain_seq), list(range(len(chain_seq))), atom_res_ids))
 
-    return zipped_map
+    # Return (res_name, res_idx, [atom_idxs]) for each residue in chain_seq
+    atom_res_map = tuple(
+        zip(list(chain_seq), list(range(len(chain_seq))), atom_res_ids)
+    )
+    named_map = [
+        ResidueAtomMap._make(atom_res_tuple) for atom_res_tuple in atom_res_map
+    ]
+
+    return named_map
 
 
 def parse_af3_results(summary_json_path, confidences_json_path, mapped_atom_res_dict):
@@ -151,51 +162,19 @@ def parse_af3_results(summary_json_path, confidences_json_path, mapped_atom_res_
                 results[f"std_plddt_{chain1}"] = np.std(sub_plddt)
 
     # CDR3 Metrics
+
+    # CDR3a and CDR3b per-residue metrics
     residues_alpha = [int(idx) for idx in np.where(residue_chain_ids == "A")[0]]
     residues_beta = [int(idx) for idx in np.where(residue_chain_ids == "B")[0]]
 
-    # CDR3a and CDR3b residue indices
-    a_cdr3_start, a_cdr3_end = (
-        mapped_atom_res_dict["CDR3a"][0][1],
-        mapped_atom_res_dict["CDR3a"][-1][1],
-    )
-    b_cdr3_start, b_cdr3_end = (
-        mapped_atom_res_dict["CDR3b"][0][1],
-        mapped_atom_res_dict["CDR3b"][-1][1],
-    )
+    a_cdr3_start = mapped_atom_res_dict["CDR3a"][0].res_idx
+    a_cdr3_end = mapped_atom_res_dict["CDR3a"][-1].res_idx
+
+    b_cdr3_start = mapped_atom_res_dict["CDR3b"][0].res_idx
+    b_cdr3_end = mapped_atom_res_dict["CDR3b"][-1].res_idx
 
     residues_alpha_cdr3 = residues_alpha[a_cdr3_start : a_cdr3_end + 1]
     residues_beta_cdr3 = residues_beta[b_cdr3_start : b_cdr3_end + 1]
-
-    # CDR3a and CDR3b atom indices
-    atoms_a_cdr3_start, atoms_a_cdr3_end = (
-        mapped_atom_res_dict["CDR3a"][0][2][0],
-        mapped_atom_res_dict["CDR3a"][-1][2][-1],
-    )
-    atoms_b_cdr3_start, atoms_b_cdr3_end = (
-        mapped_atom_res_dict["CDR3b"][0][2][0],
-        mapped_atom_res_dict["CDR3b"][-1][2][-1],
-    )
-
-    atoms_alpha_cdr3 = [int(idx) for idx in np.where(atom_chain_ids == "A")[0]][
-        atoms_a_cdr3_start : atoms_a_cdr3_end + 1
-    ]
-    atoms_beta_cdr3 = [int(idx) for idx in np.where(atom_chain_ids == "B")[0]][
-        atoms_b_cdr3_start : atoms_b_cdr3_end + 1
-    ]
-
-    plddt_alpha_cdr3 = plddt[atoms_alpha_cdr3[0] : atoms_alpha_cdr3[-1] + 1]
-    plddt_beta_cdr3 = plddt[atoms_beta_cdr3[0] : atoms_beta_cdr3[-1] + 1]
-
-    results[f"avg_plddt_cdr3a"] = np.mean(plddt_alpha_cdr3)
-    results[f"min_plddt_cdr3a"] = np.min(plddt_alpha_cdr3)
-    results[f"max_plddt_cdr3a"] = np.max(plddt_alpha_cdr3)
-    results[f"std_plddt_cdr3a"] = np.std(plddt_alpha_cdr3)
-
-    results[f"avg_plddt_cdr3b"] = np.mean(plddt_beta_cdr3)
-    results[f"min_plddt_cdr3b"] = np.min(plddt_beta_cdr3)
-    results[f"max_plddt_cdr3b"] = np.max(plddt_beta_cdr3)
-    results[f"std_plddt_cdr3b"] = np.std(plddt_beta_cdr3)
 
     for k, chain3 in enumerate(["M", "P"]):
 
@@ -248,20 +227,69 @@ def parse_af3_results(summary_json_path, confidences_json_path, mapped_atom_res_
         )
         results[f"max_contact_probs_cdr3b_{chain3}"] = np.max(sub_contact_probs_b_chain)
 
+    # CDR3a and CDR3b per-atom metrics
+    atoms_alpha = [int(idx) for idx in np.where(atom_chain_ids == "A")[0]]
+    atoms_beta = [int(idx) for idx in np.where(atom_chain_ids == "B")[0]]
+
+    atoms_a_cdr3_start = mapped_atom_res_dict["CDR3a"][0].atom_idxs[0]
+    atoms_a_cdr3_end = mapped_atom_res_dict["CDR3a"][-1].atom_idxs[-1]
+
+    atoms_b_cdr3_start = mapped_atom_res_dict["CDR3b"][0].atom_idxs[0]
+    atoms_b_cdr3_end = mapped_atom_res_dict["CDR3b"][-1].atom_idxs[-1]
+
+    atoms_alpha_cdr3 = atoms_alpha[atoms_a_cdr3_start : atoms_a_cdr3_end + 1]
+    atoms_beta_cdr3 = atoms_beta[atoms_b_cdr3_start : atoms_b_cdr3_end + 1]
+
+    plddt_alpha_cdr3 = plddt[atoms_alpha_cdr3[0] : atoms_alpha_cdr3[-1] + 1]
+    plddt_beta_cdr3 = plddt[atoms_beta_cdr3[0] : atoms_beta_cdr3[-1] + 1]
+
+    results[f"avg_plddt_cdr3a"] = np.mean(plddt_alpha_cdr3)
+    results[f"min_plddt_cdr3a"] = np.min(plddt_alpha_cdr3)
+    results[f"max_plddt_cdr3a"] = np.max(plddt_alpha_cdr3)
+    results[f"std_plddt_cdr3a"] = np.std(plddt_alpha_cdr3)
+
+    results[f"avg_plddt_cdr3b"] = np.mean(plddt_beta_cdr3)
+    results[f"min_plddt_cdr3b"] = np.min(plddt_beta_cdr3)
+    results[f"max_plddt_cdr3b"] = np.max(plddt_beta_cdr3)
+    results[f"std_plddt_cdr3b"] = np.std(plddt_beta_cdr3)
+
     # Sub-peptide metrics
     peptide_residues = [int(idx) for idx in np.where(residue_chain_ids == "P")[0]]
-    subpeptide_residues_dict = {
-        "peptide_nterm": residues_peptide[
-            :3
-        ],  # first three residues for N-terminal side
-        "peptide_cterm": residues_peptide[
-            -3:
-        ],  # last three residues for C-terminal side
-        "peptide_middle": residues_peptide[3:-3],  # middle residues
+    peptide_atoms = [int(idx) for idx in np.where(atom_chain_ids == "P")[0]]
+
+    subpeptide_mapped_dict = {
+        # first three residues for N-terminal side
+        "peptide_nterm": mapped_atom_res_dict["P"][:3],
+        # last three residues for C-terminal side
+        "peptide_cterm": mapped_atom_res_dict["P"][-3:],
+        # middle residues
+        "peptide_middle": mapped_atom_res_dict["P"][3:-3],
     }
     cdr3_residues_dict = {"cdr3a": residues_alpha_cdr3, "cdr3b": residues_beta_cdr3}
 
-    for subpeptide_name, subpeptide_residues in subpeptide_residues_dict.items():
+    for subpeptide_name, subpeptide_mapped in subpeptide_mapped_dict.items():
+
+        subpeptide_res_start = subpeptide_mapped[0].res_idx
+        subpeptide_res_end = subpeptide_mapped[-1].res_idx
+
+        subpeptide_atom_start = subpeptide_mapped[0].atom_idxs[0]
+        subpeptide_atom_end = subpeptide_mapped[-1].atom_idxs[-1]
+
+        subpeptide_residues = peptide_residues[
+            subpeptide_res_start : subpeptide_res_end + 1
+        ]
+        subpeptide_atoms = peptide_atoms[
+            subpeptide_atom_start : subpeptide_atom_end + 1
+        ]
+
+        # subpeptide pLDDT
+        subpeptide_plddt = plddt[subpeptide_atoms[0] : subpeptide_atoms[-1] + 1]
+        results[f"avg_plddt_{subpeptide_name}"] = np.mean(subpeptide_plddt)
+        results[f"min_plddt_{subpeptide_name}"] = np.min(subpeptide_plddt)
+        results[f"max_plddt_{subpeptide_name}"] = np.max(subpeptide_plddt)
+        results[f"std_plddt_{subpeptide_name}"] = np.std(subpeptide_plddt)
+
+        # subpeptide-CDR3 iPAE and contact probabilities
         for cdr3_name, cdr3_residues in cdr3_residues_dict.items():
 
             sub_pae_subpeptide_cdr3 = pae[
